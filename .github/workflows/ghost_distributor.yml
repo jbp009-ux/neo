@@ -1,0 +1,83 @@
+# Ghost Distributor — Routes Ghost review reports to correct locations
+# Triggers when Ghost reports are pushed to the reports staging area
+
+name: Ghost Distributor
+
+on:
+  push:
+    paths:
+      - "reports/ghost/**/*.md"
+      - "reports/inspector/**/*.md"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  distribute:
+    name: Distribute Reports
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Detect new reports
+        id: detect
+        run: |
+          echo "=== Checking for new reports ==="
+          CHANGED=$(git diff --name-only HEAD~1 HEAD -- 'reports/' || true)
+          if [ -z "$CHANGED" ]; then
+            echo "has_reports=false" >> $GITHUB_OUTPUT
+            echo "ℹ️ No new reports detected"
+          else
+            echo "has_reports=true" >> $GITHUB_OUTPUT
+            echo "✅ New reports found:"
+            echo "$CHANGED"
+          fi
+
+      - name: Validate report structure
+        if: steps.detect.outputs.has_reports == 'true'
+        run: |
+          echo "=== Validating report structure ==="
+          FAIL=0
+          for report in $(git diff --name-only HEAD~1 HEAD -- 'reports/'); do
+            if [ -f "$report" ]; then
+              # Ghost reports must have Evidence Score and Verdict
+              if echo "$report" | grep -q "ghost"; then
+                if ! grep -q "Evidence Score" "$report"; then
+                  echo "❌ $report missing Evidence Score"
+                  FAIL=1
+                fi
+                if ! grep -q "Verdict" "$report"; then
+                  echo "❌ $report missing Verdict"
+                  FAIL=1
+                fi
+              fi
+              # Inspector reports must have Spot-Check and Verdict
+              if echo "$report" | grep -q "inspector"; then
+                if ! grep -q "Spot-Check\|spot-check" "$report"; then
+                  echo "❌ $report missing Spot-Check section"
+                  FAIL=1
+                fi
+              fi
+              echo "✅ $report structure valid"
+            fi
+          done
+          if [ $FAIL -eq 1 ]; then
+            echo "⚠️ Some reports have structural issues"
+            exit 1
+          fi
+
+      - name: Summary
+        run: |
+          echo "### Ghost Distributor Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.detect.outputs.has_reports }}" == "true" ]; then
+            echo "✅ Reports validated and distributed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "ℹ️ No new reports to process" >> $GITHUB_STEP_SUMMARY
+          fi

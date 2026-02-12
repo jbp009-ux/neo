@@ -1,0 +1,144 @@
+# NEO Pipeline CI — Template & Role Validation
+# Ensures all NEO governance artifacts stay consistent
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate-structure:
+    name: Validate NEO Structure
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify required roles exist
+        run: |
+          echo "=== Checking NEO roles ==="
+          REQUIRED_ROLES="NEO-BECCA NEO-ANT NEO-GHOST NEO-INSPECTOR"
+          MISSING=0
+          for role in $REQUIRED_ROLES; do
+            if [ ! -f "roles/${role}.md" ]; then
+              echo "❌ Missing role: roles/${role}.md"
+              MISSING=1
+            else
+              echo "✅ roles/${role}.md"
+            fi
+          done
+          if [ $MISSING -eq 1 ]; then exit 1; fi
+
+      - name: Verify required templates exist
+        run: |
+          echo "=== Checking NEO templates ==="
+          REQUIRED_TEMPLATES="ANT_REPORT GHOST_REVIEW INSPECTOR_REPORT PROJECT_TODO RUN_INDEX"
+          MISSING=0
+          for tmpl in $REQUIRED_TEMPLATES; do
+            if [ ! -f "templates/${tmpl}.md" ]; then
+              echo "❌ Missing template: templates/${tmpl}.md"
+              MISSING=1
+            else
+              echo "✅ templates/${tmpl}.md"
+            fi
+          done
+          if [ $MISSING -eq 1 ]; then exit 1; fi
+
+      - name: Verify required shared modules exist
+        run: |
+          echo "=== Checking NEO shared modules ==="
+          REQUIRED_SHARED="NEO-ACTIVATION NEO-EVIDENCE NEO-GATES NEO-HIVE NEO-OUTPUTS NEO-SURGICAL NEO-TOOLS"
+          MISSING=0
+          for mod in $REQUIRED_SHARED; do
+            if [ ! -f "shared/${mod}.md" ]; then
+              echo "❌ Missing shared module: shared/${mod}.md"
+              MISSING=1
+            else
+              echo "✅ shared/${mod}.md"
+            fi
+          done
+          if [ $MISSING -eq 1 ]; then exit 1; fi
+
+      - name: Verify scripts exist
+        run: |
+          echo "=== Checking NEO scripts ==="
+          for script in scripts/neo-init.ps1 scripts/neo-refresh.ps1; do
+            if [ ! -f "$script" ]; then
+              echo "❌ Missing: $script"
+              exit 1
+            else
+              echo "✅ $script"
+            fi
+          done
+
+  validate-templates:
+    name: Validate Template Content
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check templates have required markers
+        run: |
+          echo "=== Validating template markers ==="
+          FAIL=0
+
+          # ANT_REPORT must have key sections
+          for section in "TASK-ID" "Files Modified" "DoD Criteria"; do
+            if ! grep -q "$section" templates/ANT_REPORT.md 2>/dev/null; then
+              echo "❌ ANT_REPORT.md missing section: $section"
+              FAIL=1
+            fi
+          done
+
+          # GHOST_REVIEW must have verification sections
+          for section in "Evidence Score" "NUCLEAR" "Verdict"; do
+            if ! grep -q "$section" templates/GHOST_REVIEW.md 2>/dev/null; then
+              echo "❌ GHOST_REVIEW.md missing section: $section"
+              FAIL=1
+            fi
+          done
+
+          # INSPECTOR_REPORT must have audit sections
+          for section in "Spot-Check" "NUCLEAR" "Verdict"; do
+            if ! grep -q "$section" templates/INSPECTOR_REPORT.md 2>/dev/null; then
+              echo "❌ INSPECTOR_REPORT.md missing section: $section"
+              FAIL=1
+            fi
+          done
+
+          if [ $FAIL -eq 1 ]; then
+            echo "❌ Template validation failed"
+            exit 1
+          else
+            echo "✅ All templates have required markers"
+          fi
+
+  markdown-lint:
+    name: Markdown Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install markdownlint
+        run: npm install -g markdownlint-cli
+
+      - name: Lint Markdown (roles + shared)
+        run: |
+          markdownlint "roles/*.md" "shared/*.md" --disable MD013 MD033 MD041 MD024 || true
+        continue-on-error: true
