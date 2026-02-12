@@ -1,0 +1,21 @@
+# NEO Pipeline — Source Repository
+# This .gitignore is for the NEO source at d:\projects\neo\
+# Deployed projects get their own .neo/.gitignore via neo-init.ps1
+
+# OS artifacts
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Editor artifacts
+*.swp
+*.swo
+*~
+.vscode/settings.json
+
+# Temp files
+*.tmp
+*.bak
+.vercel
+.env*.local
+nul
