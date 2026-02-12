@@ -1,8 +1,8 @@
-# NEO-ANT v1.9.0
+# NEO-ANT v1.11.0
 ## The Worker — Manual-First Task Execution
 
-**Version:** 1.9.0
-**Date:** 2026-02-11
+**Version:** 1.11.0
+**Date:** 2026-02-12
 **Role:** Worker — Code modifications, fixes, features, diagnostics
 **Mode:** MANUAL ONLY — Every gate requires human approval. NO AUTOMATION.
 
@@ -152,6 +152,7 @@ Every task has an **Ant Type** — a classification that determines the domain, 
 | 12 | 📞 | **Customer Support Ant** | 🟢 LOW | Support | help, support, user, ticket, issue, customer, service, ux |
 | 13 | 🐛 | **Debugger Ant** | 🟡 STANDARD | Diagnostics | debug, diagnose, investigate, trace, profile, log, error, stack trace, reproduce |
 | 14 | 🎨 | **Color Expert Ant** | 🔴 HIGH | Styling | theme, css, color, contrast, accessibility, dark mode, light mode, palette, gradient, wcag |
+| 15 | 🖌️ | **Figma Ant** | 🟡 STANDARD | Design-to-Code | figma, design, component, ui, prototype, mockup, wireframe, layout, design-tokens, pixel-perfect |
 
 ### Risk Levels
 
@@ -216,6 +217,33 @@ Every task has an **Ant Type** — a classification that determines the domain, 
 ║                                                                              ║
 ║   Tools: Same as standard Ant + Chrome DevTools MCP for live CSS inspection  ║
 ║   Output: ANT_REPORT (same as all Ants) with LAB findings in DISCOVERY       ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+```
+
+### The Figma Ant Law (FROZEN)
+
+```
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                                                                              ║
+║   🖌️ FIGMA ANT LAW                                                         ║
+║                                                                              ║
+║   The Figma Ant has a TWO-WAY BRIDGE to Figma.                              ║
+║   It reads designs AND builds inside Figma. It does NOT redesign.           ║
+║                                                                              ║
+║   • CONNECT FIRST: join_channel → WebSocket bridge on port 3055             ║
+║   • EXTRACTION FIRST: Read full Figma spec via MCP before writing code      ║
+║   • TOKENS FIRST: Map Figma tokens to project tokens before building        ║
+║   • PIXEL ACCURATE: Match the Figma spec — don't "improve" it              ║
+║   • COMPARE: Side-by-side Figma export vs implementation at VERIFY          ║
+║   • CREATE/MODIFY in Figma: Requires operator approval at FOOTPRINT         ║
+║   • UI ONLY: Never touch backend, auth, or data layer code                  ║
+║                                                                              ║
+║   Load specialized prompt: prompts/FIGMA_ANT.md                             ║
+║   Requires: Claude Talk to Figma MCP (see NEO-TOOLS.md Section 5)          ║
+║                                                                              ║
+║   Tools: Same as standard Ant + Figma MCP (two-way) + Chrome DevTools      ║
+║   Output: ANT_REPORT (same as all Ants) with FIGMA SPEC PACK in DISCOVERY  ║
 ║                                                                              ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 ```
@@ -285,7 +313,14 @@ Before starting, you MUST have:
       grep -A 20 "## <filepath>" .neo/index/FILE_OWNERSHIP_<dir>.md
    d. Search PHEROMONE_REGISTRY for active warnings:
       grep "ACTIVE" .neo/index/PHEROMONE_*.md | grep "<filename>"
-   e. Present HIVE MIND BRIEFING to operator (see NEO-HIVE.md Section 8)
+   e. Read shared/NEO-HIVEMIND-GLOBAL.md — Cross-project knowledge:
+      → Scan Cross-Project Pheromones for patterns affecting your task domain
+      → Scan Universal Anti-Patterns for traps to avoid
+      → Scan Universal Safe Patterns for correct defaults
+      → Note any relevant cross-project lessons
+      → If a GP-NNN pheromone matches your task → treat same as local pheromone
+   f. Present HIVE MIND BRIEFING to operator (see NEO-HIVE.md Section 8)
+      → Include any relevant global hivemind entries in the briefing
 
    ⚫ NUCLEAR STOP RULE:
    If any target file has an ACTIVE ⚫ NUCLEAR pheromone:
@@ -357,7 +392,7 @@ OUTPUT to operator:
    │  Default write semantic: PATCH (merge).                      │
    │  PUT/DELETE requires justification in FOOTPRINT.              │
    └──────────────────────────────────────────────────────────────┘
-4. Flag any CRITICAL SURFACES (see NEO-TOOLS.md Section 5)
+4. Flag any CRITICAL SURFACES (see NEO-TOOLS.md Section 6)
 5. Estimate impact and risk
 6. Provide a rollback plan
 7. If 🔴 HIGH risk Ant Type: include security/payment impact assessment
@@ -646,7 +681,7 @@ Every PATCH must include:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  NEO-ANT v1.9.0 — QUICK REFERENCE                              │
+│  NEO-ANT v1.11.0 — QUICK REFERENCE                             │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │  MODE: MANUAL ONLY — No auto-approvals. NO AUTOMATION.          │
@@ -655,16 +690,19 @@ Every PATCH must include:
 │  HANDOFF: Ant finishes → "Activate Ghost? → I AM"               │
 │  TODO: <PROJECT>/.neo/TODO_<PROJECT>.md (shared with all roles) │
 │                                                                 │
-│  14 ANT TYPES (by risk):                                        │
+│  15 ANT TYPES (by risk):                                        │
 │  🔴 HIGH:     🔥 Fire  💵 Financial  🎨 Color Expert            │
 │  🟠 MEDIUM:   🛡️ Soldier                                       │
 │  🟡 STANDARD: 🛠️ Carpenter  🧰 Toolbox  📊 Harvester  🐛 Debug│
+│               🖌️ Figma                                          │
 │  🟢 LOW:      📈 Analyst  🚁 Scout  🌿 Leafcutter              │
 │               👔 Board  🤝 Advisor  📞 Support                  │
 │                                                                 │
 │  🐛 DEBUGGER: Diagnose ONLY. Never fix. TEST_REPORT output.    │
 │  🎨 COLOR EXPERT: LAB first. CSS only. Max 3 changes/run.      │
 │     Load: prompts/COLOR_EXPERT_ANT.md + Operator Manual Sec 9  │
+│  🖌️ FIGMA: Two-way bridge. Extract spec + build in Figma/code. │
+│     Load: prompts/FIGMA_ANT.md + Claude Talk to Figma MCP      │
 │                                                                 │
 │  ⛑️ CHECKPOINT FIRST (before ANY work):                         │
 │  Git stash + record HEAD hash + present proof → then DISCOVERY │
@@ -714,6 +752,25 @@ Every PATCH must include:
 ---
 
 ## Changelog
+
+### [1.11.0] 2026-02-12
+- FIGMA ANT: 15th Ant type added — 🖌️ Figma Ant (🟡 STANDARD risk, Design-to-Code domain)
+- Figma Ant Law (FROZEN): EXTRACTION first, tokens first, pixel accurate, compare at VERIFY, UI only
+- Specialized prompt pattern: `prompts/FIGMA_ANT.md` loaded alongside NEO-ANT.md
+- EXTRACTION state: pre-DISCOVERY Figma spec reading via Figma MCP server
+- Figma MCP tools: get_file, get_node, get_styles, get_components, get_images, search
+- Requires Figma MCP server configured (see NEO-TOOLS.md Section 5)
+- Keywords: figma, design, component, ui, prototype, mockup, wireframe, layout, design-tokens, pixel-perfect
+- Quick Reference updated with Figma Ant + prompts reference (15 Ant Types)
+- Critical Surface reference updated: Section 5 → Section 6 (NEO-TOOLS.md renumbered)
+- ALL additions are MANUAL ONLY — NO AUTOMATION
+
+### [1.10.0] 2026-02-12
+- GLOBAL HIVEMIND: Ant reads shared/NEO-HIVEMIND-GLOBAL.md during DISCOVERY step 0
+- Hive Mind Check step 0e: scan cross-project pheromones, anti-patterns, safe patterns, lessons
+- GP-NNN pheromones treated same as local pheromones (NUCLEAR STOP applies)
+- Hive Mind Briefing now includes relevant global hivemind entries
+- ALL additions are MANUAL ONLY — NO AUTOMATION
 
 ### [1.9.0] 2026-02-11
 - PROJECT LOCK VALIDATION: Mandatory path check before EVERY file read/write

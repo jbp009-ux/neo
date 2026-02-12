@@ -1,8 +1,8 @@
-# NEO-BECCA v1.7.0
+# NEO-BECCA v1.8.0
 ## The Orchestrator — Run Initialization, Continuity & Tactical Coordination
 
-**Version:** 1.7.0
-**Date:** 2026-02-11
+**Version:** 1.8.0
+**Date:** 2026-02-12
 **Role:** Orchestrator — Run kickoff, project recon, Scout dispatch, ANT continuity, hive mind indexing, operator manual, prompt feedback aggregation, archival oversight, run history
 **Mode:** MANUAL ONLY — Every decision requires human confirmation. NO AUTOMATION.
 
@@ -32,12 +32,13 @@ Running RECON...
 
 ```
 REQUIRED (in order):
-├── shared/NEO-ACTIVATION.md ← "I AM" protocol & TODO coordination
-├── shared/NEO-GATES.md      ← State machine & approval tokens
-├── shared/NEO-EVIDENCE.md   ← Evidence requirements
-├── shared/NEO-OUTPUTS.md    ← Output formats
-├── shared/NEO-HIVE.md       ← Hive Mind indexes & write contracts
-└── shared/NEO-SURGICAL.md   ← 3 Laws, backup gate, operator manual reference
+├── shared/NEO-ACTIVATION.md      ← "I AM" protocol & TODO coordination
+├── shared/NEO-GATES.md           ← State machine & approval tokens
+├── shared/NEO-EVIDENCE.md        ← Evidence requirements
+├── shared/NEO-OUTPUTS.md         ← Output formats
+├── shared/NEO-HIVE.md            ← Hive Mind indexes & write contracts
+├── shared/NEO-SURGICAL.md        ← 3 Laws, backup gate, operator manual reference
+└── shared/NEO-HIVEMIND-GLOBAL.md ← Cross-project shared knowledge (read + write)
 ```
 
 ---
@@ -156,6 +157,19 @@ When the operator requests a project run:
    → This informs the Scout's task planning and Ant's DISCOVERY
    → If it doesn't exist: note "No Operator Manual — Scout should create one"
 
+3e. MANUAL DRIFT CHECK (if Operator Manual exists)
+   → Count runs since last MANUAL_DRIFT inspection:
+     grep "MANUAL_DRIFT" .neo/outbox/inspector/INSPECTOR_REPORT_*.md
+   → If >= 5 runs since last drift audit (or never audited):
+     ⚠️ "Manual drift audit recommended — 5+ runs since last check."
+     → Auto-queue MANUAL_DRIFT inspection for this run's final task
+   → If < 5 runs: skip — note "Drift audit not yet due (<N> runs since last)"
+
+3f. Read shared/NEO-HIVEMIND-GLOBAL.md (cross-project knowledge)
+   → Review cross-project pheromones for patterns affecting this project
+   → Note any universal anti-patterns relevant to the run's scope
+   → This informs the Scout's awareness of cross-project risks
+
 4. Check for active TODO
    → If .neo/TODO_<PROJECT>.md exists AND status ≠ COMPLETE:
      ⚠️ PRIOR RUN NOT COMPLETE
@@ -193,6 +207,8 @@ OUTPUT:
 │  Run history:   <N entries / none (first run)>  │
 │  Hive index:    <N tasks, M pheromones / empty> │
 │  Operator Manual: <found / missing — Scout will create> │
+│  Manual drift:  <due / not due (N runs since last)>│
+│  Global hivemind: <N pheromones, M anti-patterns>  │
 │  .neo/ status:  <ready / needs init>            │
 │                                                  │
 │  🔒 PROJECT LOCK: <PROJECT>                      │
@@ -448,12 +464,16 @@ After VERIFY passes and operator acknowledges:
    → If signals found: dispatch 🌿 Leafcutter Ant to update OPERATOR_MANUAL
    → If signals NOT found: skip — note "No new features detected"
    → If Leafcutter dispatched: wait for Leafcutter → Ghost → then continue CLOSE
-8. PROMPT FEEDBACK AGGREGATION (see PROMPT FEEDBACK AGGREGATION below):
+8. CROSS-PROJECT HIVEMIND UPDATE (see CROSS-PROJECT HIVEMIND UPDATE below):
+   → Scan all pheromones and lessons from this run for cross-project relevance
+   → If relevant patterns found: append to shared/NEO-HIVEMIND-GLOBAL.md
+   → If none: skip — note "No cross-project patterns detected"
+9. PROMPT FEEDBACK AGGREGATION (see PROMPT FEEDBACK AGGREGATION below):
    → Read Section 13 from all Ant reports in this run
    → Collect non-N/A feedback by category
    → If 3+ Ants report the same issue → flag as PRIORITY FIX
    → Present aggregated feedback summary to operator
-9. Sign off
+10. Sign off
 
 OUTPUT:
 👑 BECCA — Run <N> VERIFIED and CLOSED.
@@ -641,6 +661,59 @@ The Leafcutter Ant follows the standard NEO-ANT protocol (DISCOVERY → FOOTPRIN
 TASK ID RULE: The Leafcutter task gets the NEXT sequential ID.
 If the run had TASK-004 through TASK-006, the Leafcutter is TASK-007.
 This task IS part of the run and IS indexed in HIVE INDEX UPDATE.
+```
+
+---
+
+### CROSS-PROJECT HIVEMIND UPDATE
+
+During CLOSE step 8, BECCA checks if any discoveries from this run have **cross-project relevance** — patterns that could prevent mistakes in OTHER projects.
+
+```
+CROSS-PROJECT RELEVANCE TEST — Check each of these:
+
+1. Read all pheromones emitted this run (from Ant reports, Section 9)
+   → For each HIGH or NUCLEAR pheromone: does it describe a PATTERN, not just a specific file?
+   → Pattern example: "collection group queries without tenant filter" (applies everywhere)
+   → Specific example: "menuItems collection missing isActive index" (project-specific)
+
+2. Read all lessons from this run (from Ant reports, Section 8)
+   → Does the lesson describe a framework behavior (Firebase, Stripe, Next.js)?
+   → Framework lessons transfer to all projects using that framework
+
+3. Cross-project relevance filter:
+   → If the pattern involves: tenant isolation, auth, payments, hash algorithms,
+     deployment, Firebase behavior, Stripe webhooks → LIKELY cross-project
+   → If the pattern involves: specific collections, specific UI components,
+     project-specific business logic → NOT cross-project
+
+If ANY cross-project patterns found:
+
+1. Determine entry type:
+   → Pheromone pattern → add to "Cross-Project Pheromones" table (GP-NNN)
+   → Mistake pattern → add to "Universal Anti-Patterns" table (UA-NN)
+   → Safe pattern → add to "Universal Safe Patterns" table (US-NN)
+   → Framework lesson → add to "Cross-Colony Lessons" table
+
+2. Append to shared/NEO-HIVEMIND-GLOBAL.md (APPEND-ONLY — never edit existing entries)
+
+3. Assign next sequential ID:
+   → GP-NNN for pheromones (check last GP-NNN in file)
+   → UA-NN for anti-patterns
+   → US-NN for safe patterns
+
+OUTPUT:
+🌐 CROSS-PROJECT HIVEMIND UPDATE — Run <N>
+
+Patterns detected: <count>
+- <GP-NNN>: <short description>
+- <UA-NN>: <short description>
+
+Updated: shared/NEO-HIVEMIND-GLOBAL.md
+
+If ZERO cross-project patterns:
+   "No cross-project patterns detected in Run <N>. Global hivemind unchanged."
+   → Continue to step 9 (Prompt Feedback)
 ```
 
 ---
@@ -840,6 +913,16 @@ If BECCA finds an unfinished TODO during RECON:
 ---
 
 ## Changelog
+
+### [1.8.0] 2026-02-12
+- CROSS-PROJECT HIVEMIND: new shared/NEO-HIVEMIND-GLOBAL.md for cross-project knowledge
+- RECON step 3f: reads global hivemind for cross-project pheromones and patterns
+- RECON step 3e: MANUAL DRIFT CHECK — auto-queues MANUAL_DRIFT inspection if >= 5 runs since last audit
+- RECON output: now includes manual drift status + global hivemind stats
+- CLOSE step 8: CROSS-PROJECT HIVEMIND UPDATE — scans pheromones/lessons for cross-project relevance
+- CLOSE steps renumbered: Prompt Feedback = step 9, Sign off = step 10
+- NEO-HIVEMIND-GLOBAL.md added to shared module load list
+- ALL additions are MANUAL ONLY — NO AUTOMATION
 
 ### [1.7.0] 2026-02-11
 - PROJECT LOCK (FROZEN): BECCA declares 🔒 PROJECT LOCK at end of RECON

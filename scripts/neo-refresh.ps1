@@ -49,7 +49,7 @@ if (-not (Test-Path $TargetNeo)) {
 
 $mode = if ($DryRun) { "DRY RUN" } else { "LIVE" }
 Write-Host "" -ForegroundColor Cyan
-Write-Host "  NEO REFRESH v2.2 [$mode] — Syncing governance" -ForegroundColor Cyan
+Write-Host "  NEO REFRESH v2.3 [$mode] — Syncing governance" -ForegroundColor Cyan
 Write-Host "  Target: $ProjectPath" -ForegroundColor Cyan
 Write-Host ""
 
@@ -281,6 +281,59 @@ if (Test-Path $stateFile) {
             Set-Content -Path $stateFile -Value $stateText -Encoding UTF8
             Write-Host "    [UPGRADE] Added Last Pheromone ID to STATE.md" -ForegroundColor Green
         }
+    }
+}
+
+# ── 6. Sync CLAUDE.md to project root (v2.3 upgrade) ─────────────────
+$claudeFile = Join-Path $ProjectPath "CLAUDE.md"
+$claudeTemplate = Join-Path (Join-Path $NeoRoot "templates") "CLAUDE_PROJECT.md"
+$claudeNeedsUpdate = $false
+
+if (Test-Path $claudeTemplate) {
+    if (-not (Test-Path $claudeFile)) {
+        # No CLAUDE.md at all — generate from template
+        $claudeNeedsUpdate = $true
+        $claudeReason = "MISSING"
+    } elseif ((Get-Content $claudeFile -Raw) -notmatch "NEO Governed Project") {
+        # Exists but is from old PMX/Colony OS era — needs replacement
+        $claudeNeedsUpdate = $true
+        $claudeReason = "LEGACY (pre-NEO)"
+    }
+    # If it already has "NEO Governed Project", it's a NEO CLAUDE.md — leave it alone
+    # (project-specific customizations should be preserved)
+}
+
+if ($claudeNeedsUpdate) {
+    Write-Host ""
+    Write-Host "  CLAUDE.md sync:" -ForegroundColor Yellow
+
+    if ($DryRun) {
+        Write-Host "    [$claudeReason] Would generate CLAUDE.md in project root" -ForegroundColor Yellow
+    } else {
+        # Backup existing CLAUDE.md if it exists
+        if (Test-Path $claudeFile) {
+            $backupDir = Join-Path $TargetNeo "archive\legacy"
+            if (-not (Test-Path $backupDir)) {
+                New-Item -ItemType Directory -Path $backupDir -Force | Out-Null
+            }
+            $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
+            Copy-Item -Path $claudeFile -Destination (Join-Path $backupDir "CLAUDE.md.$timestamp.bak") -Force
+            Write-Host "    [BACKUP] Existing CLAUDE.md archived" -ForegroundColor Yellow
+        }
+
+        # Generate from template with project-specific placeholders
+        $projectName = (Split-Path $ProjectPath -Leaf).ToUpper()
+        $claudeContent = Get-Content $claudeTemplate -Raw
+        $claudeContent = $claudeContent -replace '\{\{PROJECT_NAME\}\}', $projectName
+        $claudeContent = $claudeContent -replace '\{\{PROJECT_PATH\}\}', $ProjectPath
+        $claudeContent = $claudeContent -replace '\{\{STACK\}\}', '(Update this with your project stack)'
+        $claudeContent = $claudeContent -replace '\{\{COMMANDS\}\}', '(Update this with your project commands)'
+        $claudeContent = $claudeContent -replace '\{\{NUCLEAR_INVARIANTS\}\}', '(Update this with your project nuclear invariants)'
+        $claudeContent = $claudeContent -replace '\{\{KEY_PATHS\}\}', '(Update this with your project key paths)'
+
+        Set-Content -Path $claudeFile -Value $claudeContent -Encoding UTF8
+        Write-Host "    [$claudeReason] Generated CLAUDE.md in project root" -ForegroundColor Green
+        Write-Host "    NOTE: Edit CLAUDE.md to add project-specific details" -ForegroundColor Yellow
     }
 }
 

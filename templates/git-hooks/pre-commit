@@ -1,0 +1,6 @@
+#!/bin/sh
+# NEO Git Hook: pre-commit
+# Runs lint-staged on staged files before committing
+# Install: copy to .husky/pre-commit in target project (via neo-init)
+
+npx lint-staged

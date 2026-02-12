@@ -1,0 +1,162 @@
+# NEO Sentinel — Critical Surface Enforcement on PRs
+# Deploy to target project: .github/workflows/sentinel.yml
+# Scans PRs for changes to critical surfaces defined in .neo/CRITICAL_SURFACES.md
+# or falls back to default categories from NEO-TOOLS.md Section 6
+
+name: Sentinel
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  sentinel:
+    name: Critical Surface Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed
+        run: |
+          BASE_SHA=${{ github.event.pull_request.base.sha }}
+          HEAD_SHA=${{ github.event.pull_request.head.sha }}
+          echo "files<<EOF" >> $GITHUB_OUTPUT
+          git diff --name-only $BASE_SHA $HEAD_SHA >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Scan for critical surface changes
+        id: scan
+        run: |
+          echo "## Sentinel Report" > sentinel-report.md
+          echo "" >> sentinel-report.md
+          CRITICAL_COUNT=0
+          WARNING_COUNT=0
+
+          # Load project-specific critical surfaces if they exist
+          if [ -f ".neo/CRITICAL_SURFACES.md" ]; then
+            echo "Using project-specific critical surfaces from .neo/CRITICAL_SURFACES.md"
+            CUSTOM_SURFACES=$(grep "^- " .neo/CRITICAL_SURFACES.md | sed 's/^- //')
+          fi
+
+          # Default critical surface patterns (from NEO-TOOLS.md Section 6)
+          DEFAULT_PATTERNS=(
+            # Auth / Security
+            "auth/" "security/" ".rules" "middleware/auth"
+            # Data Layer
+            "migrations/" "schemas/" ".prisma" "prisma/"
+            # Deploy / Infra
+            "Dockerfile" "docker-compose" ".github/workflows/" "deploy."
+            # Environment
+            ".env" "secrets/" "config/prod"
+            # Tenant Isolation
+            "middleware/tenant" "multi-tenant/"
+          )
+
+          echo "### Critical Surface Changes" >> sentinel-report.md
+          echo "" >> sentinel-report.md
+          echo "| File | Category | Status |" >> sentinel-report.md
+          echo "|------|----------|--------|" >> sentinel-report.md
+
+          while IFS= read -r file; do
+            [ -z "$file" ] && continue
+            MATCHED=""
+
+            # Check against default patterns
+            for pattern in "${DEFAULT_PATTERNS[@]}"; do
+              if echo "$file" | grep -qi "$pattern"; then
+                case "$pattern" in
+                  auth/*|security/*|.rules|middleware/auth)
+                    MATCHED="Auth/Security" ;;
+                  migrations/*|schemas/*|.prisma|prisma/*)
+                    MATCHED="Data Layer" ;;
+                  Dockerfile|docker-compose|.github/workflows/*|deploy.*)
+                    MATCHED="Deploy/Infra" ;;
+                  .env|secrets/*|config/prod)
+                    MATCHED="Environment" ;;
+                  middleware/tenant|multi-tenant/*)
+                    MATCHED="Tenant Isolation" ;;
+                esac
+                break
+              fi
+            done
+
+            # Check against project-specific surfaces
+            if [ -z "$MATCHED" ] && [ -n "$CUSTOM_SURFACES" ]; then
+              while IFS= read -r surface; do
+                if echo "$file" | grep -q "$surface"; then
+                  MATCHED="Project-Specific"
+                  break
+                fi
+              done <<< "$CUSTOM_SURFACES"
+            fi
+
+            if [ -n "$MATCHED" ]; then
+              echo "| \`$file\` | $MATCHED | CRITICAL |" >> sentinel-report.md
+              CRITICAL_COUNT=$((CRITICAL_COUNT + 1))
+            fi
+          done <<< "${{ steps.changed.outputs.files }}"
+
+          if [ $CRITICAL_COUNT -eq 0 ]; then
+            echo "| _(none)_ | — | No critical surfaces touched |" >> sentinel-report.md
+          fi
+
+          echo "" >> sentinel-report.md
+          echo "### Summary" >> sentinel-report.md
+          echo "" >> sentinel-report.md
+          echo "- **Critical surface changes:** $CRITICAL_COUNT" >> sentinel-report.md
+
+          if [ $CRITICAL_COUNT -gt 0 ]; then
+            echo "- **Action required:** These files require \`CRITICAL SURFACE OVERRIDE\` in the Ant's FOOTPRINT" >> sentinel-report.md
+            echo "- **Ghost must verify:** All critical surface edits had proper override tokens" >> sentinel-report.md
+            echo "" >> sentinel-report.md
+            echo "> **NEO Sentinel:** $CRITICAL_COUNT critical surface(s) detected. Ensure Ant FOOTPRINT includes override tokens." >> sentinel-report.md
+          else
+            echo "- **No critical surfaces touched.** Standard review applies." >> sentinel-report.md
+          fi
+
+          echo "critical_count=$CRITICAL_COUNT" >> $GITHUB_OUTPUT
+
+      - name: Comment PR with Sentinel report
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync('sentinel-report.md', 'utf8');
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number
+            });
+
+            const botComment = comments.find(c =>
+              c.user.type === 'Bot' && c.body.includes('Sentinel Report')
+            );
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body
+              });
+            }
+
+      - name: Warn on critical surfaces
+        if: steps.scan.outputs.critical_count != '0'
+        run: |
+          echo "::warning::NEO Sentinel: ${{ steps.scan.outputs.critical_count }} critical surface(s) changed. Verify CRITICAL SURFACE OVERRIDE tokens."

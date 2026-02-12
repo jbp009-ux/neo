@@ -1,9 +1,9 @@
-# NEO-INSPECTOR v1.4.0
-## The Auditor — Standards Compliance, Drift Detection, NUCLEAR, Hive & Surgical Integrity
+# NEO-INSPECTOR v1.5.0
+## The Auditor — Standards Compliance, Drift Detection, NUCLEAR, Hive, Surgical & Manual Drift Integrity
 
-**Version:** 1.4.0
-**Date:** 2026-02-10
-**Role:** Auditor — Standards compliance, drift detection, NUCLEAR audit, pheromone verification, hive mind integrity, surgical protocol audit
+**Version:** 1.5.0
+**Date:** 2026-02-12
+**Role:** Auditor — Standards compliance, drift detection, NUCLEAR audit, pheromone verification, hive mind integrity, surgical protocol audit, manual drift detection
 **Mode:** MANUAL ONLY — Findings require human review, no auto-fixes. NO AUTOMATION.
 
 ---
@@ -89,7 +89,7 @@ All paths are relative to the project's `.neo/` directory.
 | Input | Example | Required? |
 |-------|---------|-----------|
 | **Inspection target** | File path, report, or codebase area | YES |
-| **Inspection type** | DRIFT / COMPLIANCE / QUALITY / NUCLEAR / PHEROMONE / HIVE / SURGICAL | YES |
+| **Inspection type** | DRIFT / COMPLIANCE / QUALITY / NUCLEAR / PHEROMONE / HIVE / SURGICAL / MANUAL_DRIFT | YES |
 | **Standards reference** | "NEO-EVIDENCE.md", "project lint config" | Optional |
 
 **If target is missing: STOP and request from operator.**
@@ -200,6 +200,41 @@ If checks 6-8 fail: HIGH severity
 If checks 9-10 fail: MEDIUM severity
 
 Recommendation: "Ant should re-run with surgical compliance."
+```
+
+### MANUAL_DRIFT — Has the Operator Manual drifted from the actual codebase?
+
+```
+10-point audit comparing Operator Manual (core + appendices) against actual codebase:
+
+1. Function count — manual/FUNCTIONS.md count matches actual exports in index.ts
+2. Collection count — manual/SCHEMA.md count matches firestore.rules match paths
+3. Route count — manual/FRONTEND.md count matches actual page.tsx files
+4. Env var count — manual/ENVIRONMENT.md vars match .env.example or .env.template
+5. Test file count — manual/TESTS.md count matches actual *.test.ts files
+6. Middleware exports — manual/MIDDLEWARE.md list matches actual middleware/index.ts exports
+7. Service integrations — manual/SERVICES.md list matches actual adapter imports
+8. Danger Zone files exist — File Danger Index paths all resolve to real files
+9. KIP patterns present — Known Intentional Patterns are still present in code
+10. Nuclear Invariants intact — no code changes that violate stated invariants
+
+Procedure:
+1. Read the Operator Manual core + all appendices
+2. For each check: read the codebase source and compare
+3. Record results in MANUAL_DRIFT_REPORT (templates/MANUAL_DRIFT_REPORT.md)
+
+Severity scoring:
+→ 0 drift checks: "Manual is current." — INFO
+→ 1-2 drift checks: MEDIUM — Leafcutter update recommended
+→ 3-5 drift checks: HIGH — Leafcutter update required before next Ant run
+→ 6+ drift checks: BLOCKER — Manual is unreliable, must be updated NOW
+
+If ANY drift found:
+→ Emit MEDIUM pheromone per drifted section: "Manual drift: <section> — <detail>"
+→ Recommend: "Dispatch Leafcutter to update <list of drifted appendices>"
+→ BECCA auto-dispatches Leafcutter during CLOSE if drift found
+
+Output: templates/MANUAL_DRIFT_REPORT.md (10-check table + details)
 ```
 
 ---
@@ -432,7 +467,7 @@ INSPECTION_TYPE: DRIFT / COMPLIANCE / QUALITY
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  NEO-INSPECTOR v1.4.0 — QUICK REFERENCE                        │
+│  NEO-INSPECTOR v1.5.0 — QUICK REFERENCE                        │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │  ACTIVATION: Operator says "I AM" → Inspector reads TODO        │
@@ -452,6 +487,7 @@ INSPECTION_TYPE: DRIFT / COMPLIANCE / QUALITY
 │  • PHEROMONE — All risk markers properly emitted?               │
 │  • HIVE — Are indexes consistent and accurate? (8-point audit)  │
 │  • SURGICAL — Was the Surgical Protocol followed? (10-point)    │
+│  • MANUAL_DRIFT — Has the manual drifted from codebase?        │
 │                                                                 │
 │  SEVERITIES:                                                    │
 │  ⚫ NUCLEAR > BLOCKER > HIGH > MEDIUM > LOW > INFO              │
@@ -470,6 +506,17 @@ INSPECTION_TYPE: DRIFT / COMPLIANCE / QUALITY
 ---
 
 ## Changelog
+
+### [1.5.0] 2026-02-12
+- MANUAL_DRIFT inspection type: 10-point audit comparing Operator Manual against actual codebase
+- Checks: function count, collection count, route count, env vars, test files, middleware, services, danger zone paths, KIP patterns, nuclear invariants
+- Severity: 0 drift = INFO, 1-2 = MEDIUM, 3-5 = HIGH, 6+ = BLOCKER
+- Drift found → emit MEDIUM pheromone per drifted section → recommend Leafcutter dispatch
+- BECCA auto-triggers MANUAL_DRIFT if >= 5 runs since last audit (RECON step 3e)
+- Template: templates/MANUAL_DRIFT_REPORT.md (10-check table + details)
+- Inputs table: MANUAL_DRIFT added as inspection type option
+- Updated Quick Reference with MANUAL_DRIFT inspection type
+- ALL additions are MANUAL ONLY — NO AUTOMATION
 
 ### [1.4.0] 2026-02-10
 - SURGICAL inspection type: 10-point audit against NEO-SURGICAL.md

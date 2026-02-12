@@ -1,0 +1,7 @@
+#!/bin/sh
+# NEO Git Hook: pre-push
+# Runs build + tests before pushing to remote
+# Install: copy to .husky/pre-push in target project (via neo-init)
+# Customize the commands per project in .neo/ config or package.json
+
+npm run build && npm test

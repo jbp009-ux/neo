@@ -53,7 +53,7 @@ if ((Test-Path $TargetNeo) -and -not $Force) {
 }
 
 Write-Host "" -ForegroundColor Cyan
-Write-Host "  NEO INIT v2.2 — Deploying pipeline" -ForegroundColor Cyan
+Write-Host "  NEO INIT v2.3 — Deploying pipeline" -ForegroundColor Cyan
 Write-Host "  Target: $ProjectPath" -ForegroundColor Cyan
 Write-Host ""
 
@@ -244,6 +244,46 @@ foreach ($sev in $phSeverities) {
 
 Write-Host "  Seeded 7 index files in index/" -ForegroundColor Green
 
+# ── 8. Generate CLAUDE.md in project root ────────────────────────────
+$claudeFile = Join-Path $ProjectPath "CLAUDE.md"
+$claudeTemplate = Join-Path $NeoRoot "templates\CLAUDE_PROJECT.md"
+
+if (Test-Path $claudeTemplate) {
+    Write-Host ""
+    Write-Host "  Generating CLAUDE.md..." -ForegroundColor White
+
+    # Backup existing CLAUDE.md if it exists and isn't NEO-generated
+    if (Test-Path $claudeFile) {
+        $existingContent = Get-Content $claudeFile -Raw
+        if ($existingContent -notmatch "NEO Governed Project") {
+            $backupPath = Join-Path $TargetNeo "archive\legacy\CLAUDE.md.bak"
+            $backupDir = Split-Path $backupPath -Parent
+            if (-not (Test-Path $backupDir)) {
+                New-Item -ItemType Directory -Path $backupDir -Force | Out-Null
+            }
+            Copy-Item -Path $claudeFile -Destination $backupPath -Force
+            Write-Host "    [BACKUP] Existing CLAUDE.md archived to .neo/archive/legacy/" -ForegroundColor Yellow
+        }
+    }
+
+    # Read template and replace placeholders with project-specific values
+    $claudeContent = Get-Content $claudeTemplate -Raw
+    $claudeContent = $claudeContent -replace '\{\{PROJECT_NAME\}\}', $projectName
+    $claudeContent = $claudeContent -replace '\{\{PROJECT_PATH\}\}', $ProjectPath
+
+    # Fill in stack/commands/invariants/paths with placeholder guidance
+    $claudeContent = $claudeContent -replace '\{\{STACK\}\}', '(Update this with your project stack)'
+    $claudeContent = $claudeContent -replace '\{\{COMMANDS\}\}', '(Update this with your project commands)'
+    $claudeContent = $claudeContent -replace '\{\{NUCLEAR_INVARIANTS\}\}', '(Update this with your project nuclear invariants)'
+    $claudeContent = $claudeContent -replace '\{\{KEY_PATHS\}\}', '(Update this with your project key paths)'
+
+    Set-Content -Path $claudeFile -Value $claudeContent -Encoding UTF8
+    Write-Host "    [CREATED] CLAUDE.md in project root" -ForegroundColor Green
+    Write-Host "    NOTE: Edit CLAUDE.md to add project-specific stack, commands, and invariants" -ForegroundColor Yellow
+} else {
+    Write-Host "    [SKIP] templates/CLAUDE_PROJECT.md not found — CLAUDE.md not generated" -ForegroundColor Yellow
+}
+
 # ── Done ─────────────────────────────────────────────────────────────
 Write-Host ""
 Write-Host "  NEO pipeline initialized in: $TargetNeo" -ForegroundColor Cyan
@@ -257,12 +297,14 @@ Write-Host "    prompts/     Specialized Ant prompts (Color Expert)" -Foreground
 Write-Host "    index/       7 hive mind index files (seeded)" -ForegroundColor Green
 Write-Host "    STATE.md     Run counter + task ID + pheromone ID tracker" -ForegroundColor Green
 Write-Host "    RUN_INDEX.md BECCA's institutional memory" -ForegroundColor Green
+Write-Host "    CLAUDE.md    Claude Code guide (project root — tells Claude about NEO)" -ForegroundColor Green
 Write-Host ""
 Write-Host "  Next steps:" -ForegroundColor Yellow
-Write-Host "    1. (Optional) Copy templates/CRITICAL_SURFACES.md to .neo/ and customize" -ForegroundColor Yellow
-Write-Host "    2. Tell BECCA: 'deep dive into $projectName'" -ForegroundColor Yellow
-Write-Host "    3. BECCA will RECON, dispatch Scout, create TODO" -ForegroundColor Yellow
-Write-Host "    4. Say 'I AM' to activate each role in the pipeline" -ForegroundColor Yellow
+Write-Host "    1. Edit CLAUDE.md in project root — add stack, commands, nuclear invariants" -ForegroundColor Yellow
+Write-Host "    2. (Optional) Copy templates/CRITICAL_SURFACES.md to .neo/ and customize" -ForegroundColor Yellow
+Write-Host "    3. Tell BECCA: 'deep dive into $projectName'" -ForegroundColor Yellow
+Write-Host "    4. BECCA will RECON, dispatch Scout, create TODO" -ForegroundColor Yellow
+Write-Host "    5. Say 'I AM' to activate each role in the pipeline" -ForegroundColor Yellow
 Write-Host ""
 Write-Host "  To update governance later:" -ForegroundColor DarkGray
 Write-Host "    .neo\scripts\neo-refresh.ps1 -ProjectPath ""$ProjectPath""" -ForegroundColor DarkGray
