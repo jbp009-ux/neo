@@ -91,7 +91,7 @@ jobs:
           FAIL=0
 
           # ANT_REPORT must have key sections
-          for section in "TASK-ID" "Files Modified" "DoD Criteria"; do
+          for section in "TASK_ID" "Target Files" "Success Criteria" "GATE LOG" "HANDOFF"; do
             if ! grep -q "$section" templates/ANT_REPORT.md 2>/dev/null; then
               echo "❌ ANT_REPORT.md missing section: $section"
               FAIL=1
@@ -99,7 +99,7 @@ jobs:
           done
 
           # GHOST_REVIEW must have verification sections
-          for section in "Evidence Score" "NUCLEAR" "Verdict"; do
+          for section in "Evidence score" "NUCLEAR" "Verdict" "DEFINITION OF DONE" "FINDINGS"; do
             if ! grep -q "$section" templates/GHOST_REVIEW.md 2>/dev/null; then
               echo "❌ GHOST_REVIEW.md missing section: $section"
               FAIL=1
@@ -107,7 +107,7 @@ jobs:
           done
 
           # INSPECTOR_REPORT must have audit sections
-          for section in "Spot-Check" "NUCLEAR" "Verdict"; do
+          for section in "FINDINGS TABLE" "NUCLEAR" "Verdict" "SEVERITY SUMMARY"; do
             if ! grep -q "$section" templates/INSPECTOR_REPORT.md 2>/dev/null; then
               echo "❌ INSPECTOR_REPORT.md missing section: $section"
               FAIL=1
