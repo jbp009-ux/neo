@@ -153,6 +153,7 @@ Every task has an **Ant Type** — a classification that determines the domain, 
 | 13 | 🐛 | **Debugger Ant** | 🟡 STANDARD | Diagnostics | debug, diagnose, investigate, trace, profile, log, error, stack trace, reproduce |
 | 14 | 🎨 | **Color Expert Ant** | 🔴 HIGH | Styling | theme, css, color, contrast, accessibility, dark mode, light mode, palette, gradient, wcag |
 | 15 | 🖌️ | **Figma Ant** | 🟡 STANDARD | Design-to-Code | figma, design, component, ui, prototype, mockup, wireframe, layout, design-tokens, pixel-perfect |
+| 16 | 📱 | **TestFlight Ant** | 🟢 LOW | QA/Distribution | testflight, qa, ios, device, wda, simulator, crash, bug, verify, distribute, archive, build, ipa |
 
 ### Risk Levels
 
