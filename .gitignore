@@ -19,3 +19,9 @@ Desktop.ini
 .vercel
 .env*.local
 nul
+
+# Snapshot files (contain browser DOM / email session data)
+snapshot-*.txt
+
+# Sync config (contains local machine paths)
+.sync-projects
