@@ -34,10 +34,10 @@ BECCA (Orchestrator) ── Plans the work, tracks everything, closes the run
 ```
 d:\projects\neo\                          ← The NEO framework (this repo)
 ├── roles/
-│   ├── NEO-BECCA.md                     ← Orchestrator protocol (v1.8.0)
-│   ├── NEO-ANT.md                       ← Worker protocol (v1.10.0)
-│   ├── NEO-GHOST.md                     ← Reviewer protocol (v1.9.0)
-│   └── NEO-INSPECTOR.md                ← Auditor protocol (v1.5.0)
+│   ├── NEO-BECCA.md                     ← Orchestrator protocol (v1.18.0)
+│   ├── NEO-ANT.md                       ← Worker protocol (v1.25.0)
+│   ├── NEO-GHOST.md                     ← Reviewer protocol (v1.19.0)
+│   └── NEO-INSPECTOR.md                ← Auditor protocol (v1.7.0)
 ├── shared/                              ← Modules loaded by every role
 │   ├── NEO-ACTIVATION.md               ← "I AM" protocol & TODO coordination
 │   ├── NEO-GATES.md                    ← State machine & approval tokens
@@ -46,14 +46,21 @@ d:\projects\neo\                          ← The NEO framework (this repo)
 │   ├── NEO-TOOLS.md                    ← Tool permissions per role
 │   ├── NEO-HIVE.md                     ← Hive Mind indexes & write contracts
 │   ├── NEO-SURGICAL.md                 ← 3 Laws of Surgical Change
+│   ├── NEO-FIVE-HORSEMEN.md            ← 5 output killers (anti-patterns)
 │   └── NEO-HIVEMIND-GLOBAL.md          ← Cross-project shared knowledge
-├── templates/                           ← 14 templates for all artifacts
+├── templates/                           ← 18 templates for all artifacts
 │   ├── ANT_REPORT.md
 │   ├── GHOST_REVIEW.md
 │   ├── INSPECTOR_REPORT.md
 │   ├── PROJECT_TODO.md
 │   ├── OPERATOR_MANUAL.md
 │   └── ... (9 more)
+├── cards/                               ← 16 Protocol Cards (phase-specific instructions)
+│   ├── ref/                             ← GATE_TOKENS, STOP_CONDITIONS (universal)
+│   ├── ant/                             ← 7 cards: CHECKPOINT → REPORT
+│   ├── ghost/                           ← 2 cards: REVIEW → VERDICT
+│   ├── inspector/                       ← 2 cards: AUDIT → VERDICT
+│   └── becca/                           ← 3 cards: RECON → VERIFY → CLOSE
 └── playbook/                            ← Your training materials (this folder)
 ```
 
@@ -96,6 +103,26 @@ d:\projects\sonny\.neo\                   ← Sonny's NEO workspace
     ├── evidence/                        ← Test output, build logs
     └── gate-logs/                       ← Record of every approval you gave
 ```
+
+### Protocol Cards — Slim Phase Instructions
+
+The full NEO protocol is ~8,000 lines across roles and shared modules. Claude's attention degrades at that scale — rules on line 3,000 get less weight than rules on line 50.
+
+**Protocol Cards** solve this. Each card is 50-135 lines of phase-specific instructions: checklist items, tables, exact gate tokens, and stop conditions. Cards are loaded one at a time as the role progresses through phases.
+
+**How they work:**
+- BECCA includes the card loading sequence in each task packet
+- The Ant loads `cards/ant/ANT_CHECKPOINT.md` at activation, then `ANT_DISCOVERY.md`, etc.
+- Ghost loads `cards/ghost/GHOST_REVIEW.md` then `GHOST_VERDICT.md`
+- Inspector loads `cards/inspector/INSPECTOR_AUDIT.md` then `INSPECTOR_VERDICT.md`
+- Reference cards (`cards/ref/GATE_TOKENS.md`, `STOP_CONDITIONS.md`) are loaded once and kept available
+
+**You can also inject cards mid-session:**
+```
+Read cards/ant/ANT_VERIFY.md and follow it.
+```
+
+This keeps every instruction within the first 100 lines of active context — where Claude pays the most attention.
 
 ---
 

@@ -1,10 +1,11 @@
-# NEO-INSPECTOR v1.5.0
-## The Auditor — Standards Compliance, Drift Detection, NUCLEAR, Hive, Surgical & Manual Drift Integrity
+# NEO-INSPECTOR v1.8.0
+## The Auditor — Standards Compliance, Drift Detection, NUCLEAR, Hive, Surgical, Manual Drift, SaaS Safety & Gate Compliance Integrity
 
-**Version:** 1.5.0
-**Date:** 2026-02-12
-**Role:** Auditor — Standards compliance, drift detection, NUCLEAR audit, pheromone verification, hive mind integrity, surgical protocol audit, manual drift detection
+**Version:** 1.8.0
+**Date:** 2026-02-27
+**Role:** Auditor — Standards compliance, drift detection, NUCLEAR audit, pheromone verification, hive mind integrity, surgical protocol audit, manual drift detection, gate compliance verification
 **Mode:** MANUAL ONLY — Findings require human review, no auto-fixes. NO AUTOMATION.
+**Quick Cards:** For phase-specific instructions, see `cards/inspector/` (AUDIT → VERDICT)
 
 ---
 
@@ -42,7 +43,9 @@ REQUIRED (in order):
 ├── shared/NEO-OUTPUTS.md    ← Output formats
 ├── shared/NEO-TOOLS.md      ← Tool permissions (read-only for Inspector)
 ├── shared/NEO-HIVE.md       ← Hive Mind indexes (read for audit)
-└── shared/NEO-SURGICAL.md   ← 3 Laws, backup gate, data op classification (read for audit)
+├── shared/NEO-SURGICAL.md        ← 3 Laws, backup gate, data op classification (read for audit)
+├── shared/NEO-FIVE-HORSEMEN.md   ← 5 failure modes to audit for
+└── shared/NEO-HIVEMIND-GLOBAL.md ← Cross-project shared knowledge (read for audit)
 ```
 
 ---
@@ -89,7 +92,7 @@ All paths are relative to the project's `.neo/` directory.
 | Input | Example | Required? |
 |-------|---------|-----------|
 | **Inspection target** | File path, report, or codebase area | YES |
-| **Inspection type** | DRIFT / COMPLIANCE / QUALITY / NUCLEAR / PHEROMONE / HIVE / SURGICAL / MANUAL_DRIFT | YES |
+| **Inspection type** | DRIFT / COMPLIANCE / QUALITY / NUCLEAR / PHEROMONE / HIVE / SURGICAL / SAAS_SAFETY / MANUAL_DRIFT / GATE_COMPLIANCE / CARD_COMPLIANCE | YES |
 | **Standards reference** | "NEO-EVIDENCE.md", "project lint config" | Optional |
 
 **If target is missing: STOP and request from operator.**
@@ -114,6 +117,8 @@ Check for:
 - Report format compliance (per NEO-OUTPUTS.md)
 - Gate compliance (all required gates passed)
 - Tool compliance (per NEO-TOOLS.md)
+- Token normalization (V-12): Ant used normalized tokens, not raw operator text
+- Nearest Truth Rule: Ant read the most specific/local source when sources conflict
 ```
 
 ### QUALITY — Is the work of acceptable quality?
@@ -154,19 +159,21 @@ Check for:
 
 ### HIVE — Are indexes consistent and accurate?
 ```
-8-point index consistency audit:
+9-point index consistency audit:
 
 1. MASTER_INDEX entry count matches completed task count in archive
 2. FILE_OWNERSHIP entries match MASTER_INDEX file lists
    (every file in MASTER_INDEX has a FILE_OWNERSHIP entry)
 3. PHEROMONE_REGISTRY entries match Ant report pheromone sections
    (every emitted pheromone is indexed)
-4. No duplicate fingerprints in MASTER_INDEX
-5. All RESOLVED pheromones reference valid resolution tasks
+4. LESSONS_INDEX entries match Ant report Section 8 lessons
+   (every lesson extracted by BECCA is indexed in correct domain shard)
+5. No duplicate fingerprints in MASTER_INDEX
+6. All RESOLVED pheromones reference valid resolution tasks
    (RESOLVED_TASK-NNN → TASK-NNN exists in MASTER_INDEX)
-6. Shard sizes within limits (≤500 per shard for MASTER_INDEX)
-7. No orphaned entries (index references non-existent task)
-8. Format compliance (pipe delimiters, required fields, correct headers)
+7. Shard sizes within limits (≤500 per shard for MASTER_INDEX)
+8. No orphaned entries (index references non-existent task)
+9. Format compliance (pipe delimiters, required fields, correct headers)
 
 If ANY consistency issue found:
 → Flag as MEDIUM severity finding (not BLOCKER — indexes can be repaired)
@@ -202,6 +209,42 @@ If checks 9-10 fail: MEDIUM severity
 Recommendation: "Ant should re-run with surgical compliance."
 ```
 
+### SAAS_SAFETY — Are SaaS data safety rules enforced?
+```
+12-point audit against NEO-SURGICAL.md Sections 11-15 + NEO-GATES.md v1.10.0:
+
+1. TENANT ISOLATION — Ant performed tenant isolation scan in DISCOVERY
+   (grep for unscoped queries, tenant boundary identified, NUCLEAR if breach)
+2. SECRET SCAN — Ant scanned for secrets in DISCOVERY
+   (grep patterns for API keys/tokens/passwords, NUCLEAR if found in code)
+3. DATA CLASSIFICATION — Data classified by tier (T1-T4)
+   (T1 Restricted, T2 Confidential, T3 Internal, T4 Public — if data ops present)
+4. TARGET_ENVIRONMENT — Declared in FOOTPRINT
+   (EMULATOR/STAGING/PRODUCTION — S-35 if missing)
+5. PRODUCTION CONFIRMED — If PRODUCTION + destructive ops
+   (🔑 PRODUCTION CONFIRMED token in gate log, dry-run evidence from emulator/staging)
+6. DESTRUCTIVE OP LOG — All destructive operations logged
+   (operation, target, before state, after state, reversible flag)
+7. RESTORE TEST — Actual restore tested (if DATA_DELETE or MIGRATION)
+   (not attestation-only — records backed up = records restored, sample verified)
+8. NUCLEAR ENFORCEMENT — NUCLEAR = HALT, not STOP
+   (V-13: any work after NUCLEAR without 🔑 NUCLEAR RESOLVED = auto-reject)
+9. AUDIT TRAIL — Every destructive op has before/after evidence
+   (Ghost verified completeness)
+10. PII PROTECTION — No T1/T2 data in reports
+    (no real emails, names, phone numbers, credit cards in report text)
+11. SECRET PROTECTION — No secret values in reports
+    (report type and location only, never the actual key/token/password)
+12. BACKUP SCOPE — Backup scope matches task scope
+    (single doc change = doc + collection snapshot, collection op = full export)
+
+If ANY of checks 1-5 fail: BLOCKER severity
+If checks 6-9 fail: HIGH severity
+If checks 10-12 fail: MEDIUM severity
+
+Recommendation: "Ant should re-run with SaaS safety compliance."
+```
+
 ### MANUAL_DRIFT — Has the Operator Manual drifted from the actual codebase?
 
 ```
@@ -235,6 +278,60 @@ If ANY drift found:
 → BECCA auto-dispatches Leafcutter during CLOSE if drift found
 
 Output: templates/MANUAL_DRIFT_REPORT.md (10-check table + details)
+```
+
+### GATE_COMPLIANCE — Were all pipeline gates followed for every task this run?
+```
+8-point audit comparing git history against gate logs and reports:
+
+1. TASK COVERAGE — Every commit references a TASK-NNN
+   (git log --oneline for run branch → each commit has TASK-NNN in message)
+2. DISCOVERY GATE — Every task has 🔑 APPROVED DISCOVERY
+   (check ANT_REPORT Section 2 for discovery evidence)
+3. FOOTPRINT GATE — Every task has 🔑 APPROVED FOOTPRINT
+   (check ANT_REPORT Section 3 for footprint approval)
+4. PATCH GATE — Every task has 🔑 APPROVED PATCH
+   (check ANT_REPORT Section 5 for patch evidence)
+5. GHOST REVIEW — Every task has Ghost review with verdict
+   (check outbox/ghost/ for matching GHOST_REVIEW_TASK-NNN.md)
+6. PRODUCTION GATE — If deploy to production occurred, 🔑 PRODUCTION CONFIRMED present
+   (check for firebase deploy / production commands in report)
+7. UNGOVERNED COMMITS — No commits outside pipeline governance
+   (any commit without TASK-NNN = ungoverned, flag as finding)
+8. GATE ORDER — Gates passed in correct sequence
+   (DISCOVERY before FOOTPRINT before PATCH, not out of order)
+
+If ANY of checks 1-5 fail: BLOCKER severity
+If checks 6-7 fail: HIGH severity
+If check 8 fails: MEDIUM severity
+
+Recommendation: "Ungoverned changes should be reviewed retroactively or reverted."
+```
+
+### CARD_COMPLIANCE — Were Card-Deck Execution System (CDEX) rules followed?
+```
+7-point audit verifying CDEX compliance across the run:
+
+1. CARD_DECK GENERATED — BECCA created a Card Deck (CD-<RUN>) during RECON
+   (check RECON output for deck reference)
+2. CARD_RECEIPT PRESENT — Every Ant report includes a CARD_RECEIPT section
+   (deck_id, cards_executed, cards_skipped, card_outputs_attached)
+3. CORE CARDS EXECUTED — All 5 CORE cards accounted for per task
+   (CARD-CORE-001→005 either in cards_executed or waived with CARD_WAIVER)
+4. WAIVERS VALID — Every skipped card has a proper CARD_WAIVER
+   (reason, risk assessment, mitigation, approver — no blank waivers)
+5. CARD OUTPUTS MATCH — Card acceptance criteria were actually met
+   (spot-check 2 cards: does the output match what the card required?)
+6. NO FREEFORM WORK — All actions trace back to a card ID
+   (no "while I was here" changes outside any card scope)
+7. GHOST VERIFIED — Ghost Gate checked card compliance in review
+   (CARD COMPLIANCE section present in Ghost Review)
+
+If ANY of checks 1-4 fail: BLOCKER severity
+If checks 5-6 fail: HIGH severity
+If check 7 fails: MEDIUM severity
+
+Recommendation: "Agent should re-execute with proper CDEX card discipline."
 ```
 
 ---
@@ -467,7 +564,7 @@ INSPECTION_TYPE: DRIFT / COMPLIANCE / QUALITY
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  NEO-INSPECTOR v1.5.0 — QUICK REFERENCE                        │
+│  NEO-INSPECTOR v1.8.0 — QUICK REFERENCE                        │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │  ACTIVATION: Operator says "I AM" → Inspector reads TODO        │
@@ -485,9 +582,12 @@ INSPECTION_TYPE: DRIFT / COMPLIANCE / QUALITY
 │  • QUALITY — Is the work of acceptable quality?                 │
 │  • NUCLEAR — Tenant isolation / security boundary violations?   │
 │  • PHEROMONE — All risk markers properly emitted?               │
-│  • HIVE — Are indexes consistent and accurate? (8-point audit)  │
+│  • HIVE — Are indexes consistent and accurate? (9-point audit)  │
 │  • SURGICAL — Was the Surgical Protocol followed? (10-point)    │
+│  • SAAS_SAFETY — Are SaaS data safety rules enforced? (12-pt)  │
 │  • MANUAL_DRIFT — Has the manual drifted from codebase?        │
+│  • GATE_COMPLIANCE — Were all pipeline gates followed? (8-pt)  │
+│  • CARD_COMPLIANCE — Were CDEX card rules followed? (7-pt)    │
 │                                                                 │
 │  SEVERITIES:                                                    │
 │  ⚫ NUCLEAR > BLOCKER > HIGH > MEDIUM > LOW > INFO              │
@@ -504,62 +604,3 @@ INSPECTION_TYPE: DRIFT / COMPLIANCE / QUALITY
 ```
 
 ---
-
-## Changelog
-
-### [1.5.0] 2026-02-12
-- MANUAL_DRIFT inspection type: 10-point audit comparing Operator Manual against actual codebase
-- Checks: function count, collection count, route count, env vars, test files, middleware, services, danger zone paths, KIP patterns, nuclear invariants
-- Severity: 0 drift = INFO, 1-2 = MEDIUM, 3-5 = HIGH, 6+ = BLOCKER
-- Drift found → emit MEDIUM pheromone per drifted section → recommend Leafcutter dispatch
-- BECCA auto-triggers MANUAL_DRIFT if >= 5 runs since last audit (RECON step 3e)
-- Template: templates/MANUAL_DRIFT_REPORT.md (10-check table + details)
-- Inputs table: MANUAL_DRIFT added as inspection type option
-- Updated Quick Reference with MANUAL_DRIFT inspection type
-- ALL additions are MANUAL ONLY — NO AUTOMATION
-
-### [1.4.0] 2026-02-10
-- SURGICAL inspection type: 10-point audit against NEO-SURGICAL.md
-- Checks: Understanding Proof (LAW 1), Operator Manual, Data Op Classification (LAW 2), Backup proof, BACKUP APPROVED token, Write semantics (LAW 3), Anti-assumption rules, Minimum delta, Dry-run evidence, Demo/live separation
-- Severity mapping: LAW 1-2 failures = BLOCKER, LAW 3 failures = HIGH, dry-run/demo-live = MEDIUM
-- NEO-SURGICAL.md added to shared module load list
-- Inputs table: SURGICAL added as inspection type option
-- Updated Quick Reference with SURGICAL inspection type
-- ALL additions are MANUAL ONLY — NO AUTOMATION
-
-### [1.3.0] 2026-02-10
-- HIVE inspection type: 8-point index consistency audit
-- Checks: entry count, cross-index consistency, duplicate fingerprints, resolved pheromone validity, shard limits, orphaned entries, format compliance
-- Missing NUCLEAR pheromone in index = BLOCKER; other index issues = MEDIUM
-- NEO-HIVE.md added to shared module load list
-- Inputs table: HIVE added as inspection type option
-- Updated Quick Reference with HIVE inspection type
-- ALL additions are MANUAL ONLY — NO AUTOMATION
-
-### [1.2.0] 2026-02-09
-- TODO coordination: Inspector reads project TODO on activation, finds both Ant + Ghost artifacts
-- "I AM" protocol: activation via operator trigger, handoff to next Ant or BECCA
-- PASS handling: checks for remaining tasks, prompts next Ant; when all done → hands off to BECCA
-- FAIL handling: marks TODO ❌, adds blocker list to NOTES, prompts loop-back to Ant
-- Archival moved to BECCA: Inspector no longer archives directly — BECCA owns VERIFY + CLOSE
-- NEO-ACTIVATION.md added to shared module load list
-- Updated activation response to be TODO-aware (reads TODO, shows task + both artifact paths)
-- Updated Quick Reference with activation/handoff/BECCA info
-- ALL additions are MANUAL ONLY — NO AUTOMATION
-
-### [1.1.0] 2026-02-09
-- 2 new inspection types: NUCLEAR (tenant/security boundary) and PHEROMONE (risk marker validation)
-- ⚫ NUCLEAR severity added above BLOCKER — no override, always FAIL
-- NUCLEAR inspection checks: cross-tenant data, isolation breaches, credential exposure, security bypass, unsafe deletion
-- PHEROMONE inspection checks: risk-pheromone matching, suppression detection, format compliance
-- Updated Quick Reference with NUCLEAR and PHEROMONE types
-- ALL additions are MANUAL ONLY — NO AUTOMATION
-
-### [1.0.0] 2026-02-09
-- Initial release
-- Adapted from IAMBecca EXT-02 Keymaker (Prompt Inspector)
-- 3 inspection types: DRIFT, COMPLIANCE, QUALITY
-- 5 severity levels: BLOCKER, HIGH, MEDIUM, LOW, INFO
-- Structured findings format
-- Read-only enforcement — Inspector never fixes
-- Verdict tokens: INSPECTOR PASS / INSPECTOR FAIL

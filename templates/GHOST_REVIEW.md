@@ -107,6 +107,24 @@ DATE: <YYYY-MM-DD>
   Feedback about the protocol is encouraged, not penalized
 -->
 
+### Pre-Submit Self-Review sub-check (SELF-ASSESSMENT section):
+| Check | Result |
+|-------|--------|
+| Pre-Submit Self-Review table present (5 questions) | ✅/❌ |
+| Q1: Read HIVE CONTEXT and acted on lessons | YES/NO |
+| Q2: All evidence paths real, not placeholders | YES/NO |
+| Q3: Stayed within FOOTPRINT scope | YES/NO |
+| Q4: Ghost would find real diffs | YES/NO |
+| Q5: Self-checked for Five Horsemen | YES/NO |
+| All answers YES with evidence | ✅/❌ |
+
+<!--
+  ❌ table missing = MEDIUM finding ("Pre-Submit Self-Review missing")
+  Any answer NO = HIGH finding ("Ant submitted with known deficiency: Q<N>")
+  Answer YES but Ghost finds contradiction = HIGH (dishonest self-assessment)
+  This is a constitutional self-correction mechanism — Ants catch their own mistakes before Ghost
+-->
+
 ---
 
 ## 3. DEFINITION OF DONE
@@ -226,7 +244,7 @@ DATE: <YYYY-MM-DD>
 | A-07 | Operator Manual consulted (if exists) | ✅ CLEAN / ❌ VIOLATED / N/A | <evidence> |
 
 <!--
-  Full anti-assumption rules (A-01 through A-08) are in NEO-HIVE.md.
+  Full anti-assumption rules (A-01 through A-08) are in NEO-SURGICAL.md Section 5.
   Ghost spot-checks the 5 most commonly violated rules above.
   If ANY rule is VIOLATED → finding category = COMPLIANCE, severity = MEDIUM+.
 -->
@@ -272,22 +290,88 @@ DATE: <YYYY-MM-DD>
 | V-07 | Token without 🔑 prefix | ✅ NONE / ❌ FOUND | <details> |
 | V-08 | Critical surface without override | ✅ NONE / ❌ FOUND | <details> |
 | V-09 | Data operations without backup proof | ✅ NONE / ❌ FOUND | <details> |
+| V-10 | Project lock violation (file outside root) | ✅ NONE / ❌ FOUND | <details> |
+| V-11 | Feature removal without override | ✅ NONE / ❌ FOUND | <details> |
+| V-12 | Token paraphrase accepted | ✅ NONE / ❌ FOUND | <details> |
+| V-13 | NUCLEAR violation (continued after NUCLEAR) | ✅ NONE / ❌ FOUND | <details> |
 
 **Violations detected:** <count> — *any violation = AUTO REJECT*
+
+### Five Horsemen Verdict (MANDATORY)
+
+| Horseman | What Ghost Checked | Verdict |
+|----------|-------------------|---------|
+| H1 HALLUCINATION | Are ALL claims backed by real evidence? Test output real? | ✅/❌ |
+| H2 AMNESIA | Hive Mind consulted? Prior lessons acknowledged? Prior rejections addressed? | ✅/❌ |
+| H3 DRIFT | Changes stayed within approved FOOTPRINT scope? No unauthorized modifications? | ✅/❌ |
+| H4 PRIVILEGE CREEP | No unnecessary permission escalation? Critical surface overrides justified? | ✅/❌ |
+| H5 SILENT FAILURE | All errors surfaced? No swept-under-the-rug failures? | ✅/❌ |
+
+<!--
+  ANY Horseman ❌ DETECTED = finding (HIGH severity minimum).
+  H1 ❌ = evidence score drops to 0% = AUTO REJECT.
+-->
+
+**Horsemen verdict:** ✅ ALL CLEAR / ❌ <horseman> DETECTED → HIGH finding
+
+---
+
+### 6b. CARD COMPLIANCE (CDEX — Ghost Gate)
+
+> **Prime directives:** "If it isn't on a card, it didn't happen." / "If it didn't produce a receipt, it isn't accepted."
+
+| Check | Result | Details |
+|-------|--------|---------|
+| CARD_RECEIPT present in Ant report | ✅/❌ | <Section 14 exists?> |
+| deck_id matches task packet | ✅/❌ | <deck ID consistent?> |
+| All CORE cards accounted for | ✅/❌ | <CORE-001 through CORE-005 — executed or waived?> |
+| TASK cards match phases performed | ✅/❌ | <cards align with actual work done?> |
+| cards_skipped all have CARD_WAIVERs | ✅/❌/N/A | <every skip has reason + risk + mitigation?> |
+| card_outputs_attached are real | ✅/❌ | <artifacts exist at stated paths?> |
+| No freeform work outside cards | ✅/❌ | <all actions traceable to a card?> |
+| Acceptance criteria met per card | ✅/❌ | <each card's criteria satisfied?> |
+
+**CARD_RECEIPT summary:**
+
+| Field | Value |
+|-------|-------|
+| deck_id | <from receipt> |
+| policy_pack | <PP-YYYY-MM-DD — matches GPS map?> |
+| cards_executed | <count> |
+| cards_skipped | <count> |
+| card_outputs_attached | <count> |
+| blockers | <count or NONE> |
+
+**Card compliance verdict:** ✅ COMPLIANT / ❌ NON-COMPLIANT → <finding IDs>
+
+<!--
+  FAIL_BLOCKING if:
+  - CARD_RECEIPT missing entirely → S-38
+  - CORE card skipped without waiver → S-39 (NUCLEAR)
+  - Freeform work detected outside any card
+
+  On block, Ghost states:
+  - Which card(s) missing
+  - Next card to execute
+  - Expected artifact from that card
+  This is the CDEX self-healing output.
+-->
 
 ---
 
 ## 7. FINDINGS
 
-| ID | Severity | Category | Finding | Location |
-|----|----------|----------|---------|----------|
-| F-001 | HIGH/MED/LOW/INFO | EVIDENCE/COMPLIANCE/QUALITY/NUCLEAR/SURGICAL | <finding> | <where> |
+| ID | Severity | Category | Rule | Stage | Finding | Location |
+|----|----------|----------|------|-------|---------|----------|
+| F-001 | HIGH/MED/LOW/INFO | EVIDENCE/COMPLIANCE/QUALITY/NUCLEAR/SURGICAL | S-NN/V-NN/NONE | <stage> | <finding> | <where> |
 
 ### Finding Details
 
 #### F-001: <title>
 - **Severity:** <level>
 - **Category:** <EVIDENCE / COMPLIANCE / QUALITY / NUCLEAR / SURGICAL>
+- **Rule Triggered:** <S-NN / V-NN / NONE> *(cite specific rule from NEO-GATES Appendix A)*
+- **Stage:** <DISCOVERY / FOOTPRINT / BACKUP / PATCH / VERIFY / REPORT> *(where failure occurred)*
 - **Location:** <file:line>
 - **Description:** <what the issue is>
 - **Evidence:** <proof>
@@ -324,8 +408,8 @@ DATE: <YYYY-MM-DD>
 | 6. Nuclear & Pheromone | CLEAR/FLAGGED |
 
 **If REJECTED — Deficiency List:**
-1. <deficiency 1 — reference section + finding ID>
-2. <deficiency 2>
+1. <deficiency 1 — reference section + finding ID> [Rule: <S-NN/V-NN/NONE>] [Stage: <stage>]
+2. <deficiency 2> [Rule: <S-NN/V-NN/NONE>] [Stage: <stage>]
 
 **Handoff:**
 - If APPROVED: → Activate Inspector? → I AM

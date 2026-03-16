@@ -1,6 +1,41 @@
 #!/bin/sh
 # NEO Git Hook: pre-commit
-# Runs lint-staged on staged files before committing
+# Enforces pipeline governance before allowing commits
 # Install: copy to .husky/pre-commit in target project (via neo-init)
 
+# 1. Run lint-staged on staged files
 npx lint-staged
+
+# 2. NEO GATE CHECK — warn on ungoverned commits
+# Check if a NEO run is active by looking for TODO file
+NEO_DIR=".neo"
+PROJECT_NAME=$(basename "$(pwd)")
+
+if [ -d "$NEO_DIR" ]; then
+  TODO_FILE=$(find "$NEO_DIR" -maxdepth 1 -name "TODO_*.md" 2>/dev/null | head -1)
+  STATE_FILE="$NEO_DIR/STATE.md"
+
+  # Check if STATE.md exists and has an active run
+  if [ -f "$STATE_FILE" ]; then
+    STATUS=$(grep -i "^\\*\\*Status:\\*\\*" "$STATE_FILE" 2>/dev/null | head -1)
+
+    # If no active TODO exists, this might be an ungoverned commit
+    if [ -z "$TODO_FILE" ] || [ ! -f "$TODO_FILE" ]; then
+      echo ""
+      echo "╔══════════════════════════════════════════════════════════════╗"
+      echo "║  ⚠️  NEO GATE WARNING: No active TODO found                ║"
+      echo "║                                                              ║"
+      echo "║  This commit may be UNGOVERNED (no active NEO run).        ║"
+      echo "║  Ungoverned commits skip: Discovery, Footprint, Review.    ║"
+      echo "║                                                              ║"
+      echo "║  If this is intentional (docs, config, non-code):          ║"
+      echo "║  → Commit will proceed with a warning flag.                ║"
+      echo "║                                                              ║"
+      echo "║  If this is a code change:                                  ║"
+      echo "║  → Consider: BECCA ACTIVATE first.                         ║"
+      echo "╚══════════════════════════════════════════════════════════════╝"
+      echo ""
+      echo "[NEO] UNGOVERNED COMMIT — no active TODO at $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    fi
+  fi
+fi

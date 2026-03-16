@@ -31,9 +31,10 @@ d:\projects\neo\scripts\neo-refresh.ps1 -ProjectPath "d:\projects\sonny" -DryRun
 your-project/
   .neo/
     roles/          ← NEO-BECCA, NEO-ANT, NEO-GHOST, NEO-INSPECTOR
-    shared/         ← NEO-ACTIVATION, NEO-GATES, NEO-EVIDENCE, NEO-OUTPUTS, NEO-TOOLS, NEO-HIVE, NEO-SURGICAL
-    templates/      ← 13 templates (reports, packets, TODO, indexes, Operator Manual)
-    prompts/        ← Specialized Ant prompts (Color Expert)
+    shared/         ← NEO-ACTIVATION, NEO-GATES, NEO-EVIDENCE, NEO-OUTPUTS, NEO-TOOLS, NEO-HIVE, NEO-SURGICAL, NEO-FIVE-HORSEMEN, NEO-HIVEMIND-GLOBAL
+    templates/      ← 13+ templates (reports, packets, TODO, indexes, Operator Manual, git-hooks, vscode, github-workflows)
+    prompts/        ← Specialized Ant prompts (Color Expert, Figma, QA, Prompt Architect, Evolution Inspector)
+    injections/     ← Safety modules for mid-session paste (STOP, STRIKE, BUILD_FAILURE, etc.)
     scripts/        ← neo-init.ps1, neo-refresh.ps1 (self-update tools)
     inbox/          ← Task packets waiting for assignment
     outbox/
@@ -44,7 +45,7 @@ your-project/
       evidence/     ← Evidence artifacts (diffs, test output, screenshots)
       reviews/      ← Archived reviews
       gate-logs/    ← Completed gate logs
-    index/          ← Hive Mind indexes (MASTER_INDEX, FILE_OWNERSHIP, PHEROMONE)
+    index/          ← Hive Mind indexes (MASTER, FILE_OWNERSHIP, PHEROMONE, LESSONS, REJECTION, FINDINGS)
     archive/        ← Completed TODOs from previous runs
     runtime/        ← Active task state
     STATE.md        ← Run counter + last task ID
@@ -102,11 +103,11 @@ SCOUT (Ant)
     |  Surveys project, creates TODO_<PROJECT>.md with tasks
     |
     v  "I AM"                          +------------------+
-ANT (per task)                         |  REJECTION LOOP  |
-    |  CHECKPOINT -> DISCOVERY ->      |                  |
-    |  FOOTPRINT -> [BACKUP] ->        |  Ghost/Inspector |
-    |  PATCH -> VERIFY -> REPORT       |  rejects -> back |
-    |  (4-5 gates, each needs          |  to Ant (max 3)  |
+ANT (per task)                         +------------------+
+    |  CHECKPOINT -> DISCOVERY ->      |  REJECTION LOOP  |
+    |  FOOTPRINT -> [BACKUP] ->        |  Loop 1-2: retry |
+    |  PATCH -> VERIFY -> REPORT       |  Loop 3: STRIKE 3|
+    |  (4-5 gates, each needs          |  → Debugger Ant  |
     v  "I AM"                          +------------------+
 GHOST (per task)
     |  8-section structured review
@@ -133,26 +134,28 @@ BECCA CLOSE
 
 ---
 
-## 14 Ant Types
+## 16 Ant Types
 
 Tasks are classified by risk. Risk level affects gate behavior and review requirements.
 
-| Risk | Type | Use When |
-|------|------|----------|
-| HIGH | Fire Ant | Security fixes, auth changes, critical patches |
-| HIGH | Financial Ant | Payment logic, billing, subscription changes |
-| MEDIUM | Soldier Ant | Input validation, data integrity, edge cases |
-| STANDARD | Carpenter Ant | New features, refactoring, structural changes |
-| STANDARD | Toolbox Ant | Dependency updates, config changes, tooling |
-| STANDARD | Harvester Ant | Data collection, analytics, logging |
-| STANDARD | Debugger Ant | Diagnose only — never fix (TEST_REPORT output) |
-| LOW | Analyst Ant | Research, analysis, recommendations |
-| LOW | Flying Scout Ant | Survey project, create TODO, assess scope |
-| LOW | Leafcutter Ant | Documentation, comments, naming cleanup |
-| LOW | Board Ant | Architecture decisions, design reviews |
-| LOW | Advisor Ant | Cross-team coordination, dependency alignment |
-| HIGH | Color Expert Ant | Theme/CSS changes, color contrast, accessibility, dark/light mode |
-| LOW | Support Ant | User-facing issues, support tickets, UX fixes |
+| # | Risk | Type | Use When |
+|---|------|------|----------|
+| 1 | 🔴 HIGH | 🔥 Fire Ant | Security fixes, auth changes, critical patches |
+| 2 | 🔴 HIGH | 💵 Financial Ant | Payment logic, billing, subscription changes |
+| 3 | 🟠 MEDIUM | 🛡️ Soldier Ant | Input validation, data integrity, edge cases |
+| 4 | 🟡 STANDARD | 🛠️ Carpenter Ant | New features, refactoring, structural changes |
+| 5 | 🟡 STANDARD | 🧰 Toolbox Ant | Dependency updates, config changes, tooling |
+| 6 | 🟡 STANDARD | 📊 Harvester Ant | Data collection, analytics, logging |
+| 7 | 🟢 LOW | 📈 Analyst Ant | Research, analysis, recommendations |
+| 8 | 🟢 LOW | 🚁 Flying Scout Ant | Survey project, create TODO, assess scope |
+| 9 | 🟢 LOW | 🌿 Leafcutter Ant | Documentation, comments, naming cleanup |
+| 10 | 🟢 LOW | 👔 Board Ant | Architecture decisions, design reviews |
+| 11 | 🟢 LOW | 🤝 Advisor Ant | Cross-team coordination, dependency alignment |
+| 12 | 🔴 HIGH | 🎨 Color Expert Ant | Theme/CSS changes, color contrast, accessibility, dark/light mode |
+| 13 | 🟡 STANDARD | 🐛 Debugger Ant | Diagnose only — never fix (TEST_REPORT output, Strike 3 auto-trigger) |
+| 14 | 🟢 LOW | 📞 Support Ant | User-facing issues, support tickets, UX fixes |
+| 15 | 🟡 STANDARD | 🖌️ Figma Ant | Design-to-code bridge, Figma MCP, spec extraction |
+| 16 | 🟡 STANDARD | 🔍 QA Ant | Browser verification, Playwright MCP, screenshots (QA_REPORT output) |
 
 ---
 
@@ -240,23 +243,27 @@ Run 3: TASK-008
 
 ## Hive Mind (Shared Intelligence)
 
-Every Ant works with full awareness of what came before. Three index types make this possible:
+Every Ant works with full awareness of what came before. Six index types make this possible:
 
 | Index | Purpose | Sharding |
 |-------|---------|----------|
 | **MASTER_INDEX** | One line per completed task (pipe-delimited, grep-searchable) | 500 entries per shard |
 | **FILE_OWNERSHIP** | Per-file modification history (which tasks touched which files) | By directory prefix |
 | **PHEROMONE_REGISTRY** | Active warnings by severity, with resolution tracking | 5 files (one per severity) |
+| **LESSONS_INDEX** | Prior lessons by domain (GOTCHAs, FRAGILEs, patterns) | By domain (auth/payments/ui/etc.) |
+| **REJECTION_INDEX** | Ghost/Inspector rejections (REJ-NNN), 7 categories, resolution tracking | Single file |
+| **FINDINGS_INDEX** | Aggregated finding types with running counts + threshold alerts | Single file |
 
 ### How it works
 
-1. **Ant DISCOVERY** — Before reading code, the Ant checks all 3 indexes for target files. Active pheromones and high-traffic files are surfaced in a Hive Mind Briefing
+1. **Ant DISCOVERY** — Before reading code, the Ant checks all 6 indexes for target files. Active pheromones, lessons, and high-traffic files are surfaced in a Hive Mind Briefing
 2. **NUCLEAR STOP** — If a target file has an active NUCLEAR pheromone, the Ant STOPS and requests operator clearance
-3. **Ant REPORT Section 10** — Hive context is recorded (previous tasks, active pheromones, hive risk per file)
-4. **Ghost Section 5b** — Ghost validates the Ant's hive context claims against actual indexes
-5. **BECCA CLOSE** — After all tasks complete, BECCA writes to all 3 indexes (single writer, atomic)
-6. **BECCA RECON** — On next run, BECCA checks index health before dispatching Scout
-7. **Inspector HIVE audit** — 8-point consistency check across all indexes
+3. **Ant REPORT Section 11** — Hive context is recorded (previous tasks, active pheromones, lessons, hive risk per file)
+4. **Ghost Section 5b** — Ghost validates the Ant's hive context claims against actual indexes (all 6)
+5. **BECCA CLOSE** — After all tasks complete, BECCA writes to all 6 indexes (single writer, atomic)
+6. **BECCA RECON** — On next run, BECCA checks index health + PHEROMONE TRIAGE + rejection/findings counts
+7. **Inspector HIVE audit** — consistency check across all indexes
+8. **Prompt Architect** — mines LESSONS, REJECTION, and FINDINGS indexes for framework improvement signals
 
 ### Scale
 
@@ -372,12 +379,14 @@ When you update NEO source files (`d:\projects\neo\`), push changes to all proje
 .neo\scripts\neo-refresh.ps1 -ProjectPath "d:\projects\sonny"
 ```
 
-The refresh script:
-- Syncs roles/, shared/, templates/, prompts/, scripts/ (hash-based, only changed files)
+The refresh script (v2.5):
+- Syncs roles/, shared/, templates/, prompts/, scripts/, injections/ (hash-based, only changed files)
 - Creates missing directories from newer NEO versions
 - Migrates legacy NEO_STATE.json to STATE.md if found
+- Seeds hive mind index files (MASTER, FILE_OWNERSHIP, PHEROMONE, LESSONS, REJECTION, FINDINGS)
+- Upgrades STATE.md with new fields (Last Lesson ID, Last Rejection ID)
+- Post-sync version verification (flags mismatches between source and deployed)
 - Preserves: inbox, outbox, audit, archive, runtime, index, STATE.md, RUN_INDEX.md, TODO, CRITICAL_SURFACES.md, OPERATOR_MANUAL
-- Seeds hive mind index files on v2.1 upgrade (if missing)
 
 ---
 
@@ -386,48 +395,68 @@ The refresh script:
 ### Roles (4)
 | File | Version | Role |
 |------|---------|------|
-| `NEO-BECCA.md` | v1.7.0 | Orchestrator (index writes + health check + Operator Manual + feedback aggregation + PROJECT LOCK) |
-| `NEO-ANT.md` | v1.9.0 | Worker (14 Ant Types, Hive Mind Check, BACKUP gate, Color Expert LAB, CHECKPOINT FIRST, PROJECT LOCK validation) |
-| `NEO-GHOST.md` | v1.8.0 | Reviewer (8-section output + hive + surgical + prompt feedback validation) |
-| `NEO-INSPECTOR.md` | v1.4.0 | Auditor (7 inspection types incl. HIVE + SURGICAL) |
+| `NEO-BECCA.md` | v1.16.0 | Orchestrator (6 hive indexes, Strike 3 escalation, escalation ladder, RUN_METRICS, PROJECT LOCK) |
+| `NEO-ANT.md` | v1.23.0 | Worker (16 Ant Types, Hive Mind Check, BACKUP gate, Debugger lab, Strike 3 escalation, CHECKPOINT FIRST) |
+| `NEO-GHOST.md` | v1.16.0 | Reviewer (8-section review, Strike 3 detection, Scout/Debugger/QA report variants) |
+| `NEO-INSPECTOR.md` | v1.6.0 | Auditor (7 inspection types incl. HIVE + SURGICAL + Five Horsemen) |
 
-### Shared Modules (7)
+### Shared Modules (9)
 | File | Version | Purpose |
 |------|---------|---------|
-| `NEO-ACTIVATION.md` | v1.4.0 | "I AM" protocol, TODO coordination, BECCA bookends, PROJECT LOCK binding |
-| `NEO-GATES.md` | v1.5.0 | State machine, approval tokens, BACKUP gate, LAB state, STOP rules, violations, V-10 PROJECT LOCK |
-| `NEO-EVIDENCE.md` | v1.3.0 | Evidence doctrine, pheromones, surgical protocol evidence |
-| `NEO-OUTPUTS.md` | v1.8.0 | Output contracts per role (incl. hive context + surgical + Color Expert) |
-| `NEO-TOOLS.md` | v1.1.0 | Tool permissions, critical surfaces |
-| `NEO-HIVE.md` | v1.0.0 | Hive Mind indexes, sharding, read/write contracts |
-| `NEO-SURGICAL.md` | v1.1.0 | 3 Laws, anti-assumption rules, backup gate, data ops, Operator Manual, CHECKPOINT FIRST, PROJECT ISOLATION |
+| `NEO-ACTIVATION.md` | v1.5.0 | "I AM" protocol, TODO coordination, Strike 3 escalation, PROJECT LOCK binding |
+| `NEO-GATES.md` | v1.8.0 | State machine, approval tokens, BACKUP gate, LAB state, STOP rules, Token Normalization |
+| `NEO-EVIDENCE.md` | v1.6.0 | Evidence doctrine, pheromones, Nearest Truth Rule, surgical protocol evidence |
+| `NEO-OUTPUTS.md` | v1.10.0 | Output contracts per role (ANT_REPORT, TEST_REPORT, QA_REPORT, GHOST_REVIEW) |
+| `NEO-TOOLS.md` | v1.9.0 | Tool permissions, Debugger full lab, critical surfaces |
+| `NEO-HIVE.md` | v1.2.0 | 6 Hive Mind indexes, sharding, PHEROMONE_TRIAGE, read/write contracts |
+| `NEO-SURGICAL.md` | v1.3.0 | 3 Laws, anti-assumption rules, backup gate, data ops, Operator Manual, CHECKPOINT FIRST |
+| `NEO-FIVE-HORSEMEN.md` | v1.0.0 | 5 failure modes: Hallucination, Amnesia, Drift, Privilege Creep, Accountability |
+| `NEO-HIVEMIND-GLOBAL.md` | v1.1.0 | Cross-project pheromones, anti-patterns, safe patterns, lessons, deprecation lifecycle |
 
-### Prompts (1)
+### Prompts (5)
 | File | Purpose |
 |------|---------|
-| `COLOR_EXPERT_ANT.md` | Specialized prompt for 🎨 Color Expert Ant (LAB workflow, CSS safety, WCAG compliance) |
+| `COLOR_EXPERT_ANT.md` | 🎨 Color Expert Ant (LAB workflow, CSS safety, WCAG compliance) |
+| `FIGMA_ANT.md` | 🖌️ Figma Ant (design-to-code bridge, Figma MCP) |
+| `QA_ANT.md` | 🔍 QA Ant (browser verification, Playwright MCP) |
+| `PROMPT_ARCHITECT.md` | Framework improvement (Proactive Intelligence Scan, 8 sources) |
+| `PROMPT_EVOLUTION_INSPECTOR.md` | Prompt quality audit for role/shared files |
 
-*Specialized prompts extend the base NEO-ANT role with domain-specific context. Loaded alongside NEO-ANT.md when that Ant type activates.*
+*Specialized prompts extend base roles with domain-specific context. Loaded alongside the role file when that type activates.*
 
-### Templates (13)
+### Injections (6)
 | File | Purpose |
 |------|---------|
-| `ANT_REPORT.md` | Ant's 13-section report + header (incl. Hive Context, Backup Proof, Lessons, Prompt Feedback) |
-| `GHOST_REVIEW.md` | Ghost's 8-section structured review (incl. Hive + Surgical Compliance) |
+| `BUILD_FAILURE.md` | Mid-session paste: build failure recovery |
+| `CRITICAL_SURFACE.md` | Mid-session paste: critical surface detected |
+| `EVIDENCE_REQUIRED.md` | Mid-session paste: evidence gap found |
+| `SCOPE_LOCK.md` | Mid-session paste: scope creep detected |
+| `STOP_PROTOCOL.md` | Mid-session paste: STOP condition triggered |
+| `STRIKE_TWO.md` | Mid-session paste: second rejection warning |
+
+### Templates (13+)
+| File | Purpose |
+|------|---------|
+| `ANT_REPORT.md` | Ant's 13-section report (Scout=6 sections, Debugger uses TEST_REPORT) |
+| `GHOST_REVIEW.md` | Ghost's 8-section structured review |
 | `INSPECTOR_REPORT.md` | Inspector's findings + verdict |
+| `TEST_REPORT.md` | 🐛 Debugger Ant's 11-section diagnosis output |
 | `TASK_PACKET.md` | Task request form (input to Ant) |
 | `PROJECT_TODO.md` | Active TODO template |
 | `RUN_INDEX.md` | BECCA's institutional memory template |
-| `TEST_REPORT.md` | Debugger Ant's diagnosis output |
 | `GATE_LOG.md` | Approval token trail (incl. BACKUP gate) |
 | `CRITICAL_SURFACES.md` | Project-specific critical files template |
 | `MASTER_INDEX.md` | Hive Mind task registry template |
 | `FILE_OWNERSHIP.md` | Hive Mind per-file history template |
 | `PHEROMONE_REGISTRY.md` | Hive Mind active warnings template |
 | `OPERATOR_MANUAL.md` | Project-specific danger zones, safe ops, red flags |
+| `CLAUDE_PROJECT.md` | Template for project CLAUDE.md files |
+| `MANUAL_DRIFT_REPORT.md` | Inspector manual drift audit output |
+| `LESSONS_INDEX.md` | Template for per-domain lessons (via neo-refresh seed) |
+| `QA_REPORT.md` | 🔍 QA Ant verification output |
 
 ### Scripts (2)
 | File | Purpose |
 |------|---------|
 | `neo-init.ps1` | First-time deployment to a project |
-| `neo-refresh.ps1` | Sync governance updates to a project |
+| `neo-refresh.ps1` | v2.5 — Sync governance + version verification + index seeds |

@@ -1,10 +1,98 @@
-# NEO-ACTIVATION v1.4.0
+# NEO-ACTIVATION v1.10.0
 ## The "I AM" Protocol — Role Activation, Handoff & Tactical TODO Coordination
 
-**Version:** 1.4.0
-**Date:** 2026-02-11
+**Version:** 1.10.0
+**Date:** 2026-03-02
 **Purpose:** Defines how roles activate, hand off, and coordinate through a shared TODO document
 **Mode:** MANUAL ONLY — Every role transition requires human "I AM" trigger. NO AUTOMATION.
+
+---
+
+## 0. RESPONSE BOUNDARY PROTOCOL (READ FIRST — HIGHEST PRIORITY)
+
+```
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                                                                              ║
+║   🛑 ONE GATE PER RESPONSE. YOUR RESPONSE MUST END AT EACH GATE.           ║
+║                                                                              ║
+║   After producing a gate output, STOP GENERATING IMMEDIATELY.               ║
+║   Write the gate prompt as your LAST LINE. Produce NO further text.         ║
+║   The next message MUST come from the operator. You WAIT.                    ║
+║                                                                              ║
+║   Gate checkpoints where your response MUST end:                             ║
+║                                                                              ║
+║   BECCA: After RECON → ⏸️ Waiting for: I AM (Scout)                        ║
+║   BECCA: After TODO  → ⏸️ Waiting for: I AM (Planner or Ant)              ║
+║   PLANNER: After SKELETON → ⏸️ Gate: PLAN SKELETON OK?                    ║
+║   PLANNER: After BATCH   → ⏸️ Gate: TASK BATCH <N> OK?                   ║
+║   PLANNER: After PLAN    → ⏸️ RUN PLAN OK? Activate first Ant? → I AM    ║
+║   ANT: After DISCOVERY  → ⏸️ Gate: 🔑 DISCOVERY OK?                       ║
+║   ANT: After FOOTPRINT  → ⏸️ Gate: 🔑 FOOTPRINT OK?                       ║
+║   ANT: After PATCH       → ⏸️ Gate: 🔑 PATCH OK?                          ║
+║   ANT: After VERIFY      → ⏸️ Gate: 🔑 VERIFY OK?                         ║
+║   ANT: After REPORT      → ⏸️ Waiting for: I AM (Ghost)                    ║
+║   GHOST: After VERDICT   → ⏸️ Waiting for: I AM                            ║
+║   INSPECTOR: After AUDIT → ⏸️ Waiting for: I AM                            ║
+║                                                                              ║
+║   SELF-TEST: If your response contains TWO gate outputs, you violated       ║
+║   this protocol. Each gate = one response = one operator turn.               ║
+║                                                                              ║
+║   ROLE BOUNDARIES:                                                           ║
+║   • BECCA may NOT use Edit/Write/Bash to modify source code files           ║
+║   • Ghost may NOT fix code — only review and report                          ║
+║   • Inspector may NOT fix code — only audit and report                       ║
+║   • ONE task per Ant activation — complete the full pipeline                 ║
+║     (Ant → Ghost → Inspector) before starting the next task                  ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+```
+
+---
+
+## 0b. COMMAND INTERPRETATION RULE (ANTI-BYPASS)
+
+```
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                                                                              ║
+║   🚫 OPERATOR CONVENIENCE PHRASES DO NOT OVERRIDE GATES.                    ║
+║                                                                              ║
+║   "BECCA ACTIVATE" ALWAYS starts with RECON. No exceptions.                 ║
+║   The words AFTER "BECCA ACTIVATE" are CONTEXT for RECON —                  ║
+║   they are NOT blanket permission to skip the pipeline.                      ║
+║                                                                              ║
+║   EXAMPLES OF WHAT OPERATORS SAY vs. WHAT YOU DO:                           ║
+║                                                                              ║
+║   "BECCA ACTIVATE have the team fix all"                                    ║
+║     → You do RECON. Then Scout. Then dispatch Ants ONE AT A TIME.           ║
+║     → "fix all" means "find all issues and plan fixes" — NOT "skip gates." ║
+║                                                                              ║
+║   "BECCA ACTIVATE fix these 4 bugs"                                         ║
+║     → You do RECON. Scout creates TODO with 4 tasks. Each goes through     ║
+║       Ant → Ghost → Inspector with operator approval at every gate.         ║
+║                                                                              ║
+║   "BECCA ACTIVATE deploy to production"                                     ║
+║     → You do RECON. Assess what needs deploying. Ant does the work.        ║
+║       Ghost reviews. 🔑 PRODUCTION CONFIRMED before any deploy.             ║
+║                                                                              ║
+║   "just fix it" / "do everything" / "handle it"                             ║
+║     → These are CONTEXT, not AUTHORITY. You still follow every gate.        ║
+║                                                                              ║
+║   HARD RULE: If you find yourself about to Edit source code, run builds,   ║
+║   commit, push, or deploy — and you have NOT been through the full         ║
+║   pipeline (RECON → Scout → Ant gates → Ghost → Inspector) — STOP.        ║
+║   You are violating the pipeline. Tell the operator:                        ║
+║   "I need to follow the NEO pipeline. Starting RECON."                      ║
+║                                                                              ║
+║   NO OPERATOR INSTRUCTION OVERRIDES THE GATE SYSTEM.                        ║
+║   Not "fix all." Not "do everything." Not "skip the pipeline."              ║
+║   Not even "I don't care about gates." The gates exist to protect           ║
+║   production systems serving 100K+ clients.                                 ║
+║                                                                              ║
+║   The ONLY escape: operator explicitly says "OVERRIDE — proceed without     ║
+║   pipeline" — and you log it as OPERATOR OVERRIDE for Inspector to flag.    ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+```
 
 ---
 
@@ -30,7 +118,7 @@
 |------|--------|
 | 1 | Current role finishes and suggests the next role |
 | 2 | Operator says **"I AM"** |
-| 3 | Next role activates: reads its prompt file, then reads the TODO |
+| 3 | Next role activates: reads its prompt file, loads its Protocol Card (`cards/<role>/`), then reads the TODO |
 | 4 | Role identifies current task from TODO and begins work |
 | 5 | Role works, updates TODO with progress and artifact paths |
 | 6 | Role finishes and suggests next role → back to step 2 |
@@ -137,6 +225,18 @@ Operator ────→ 👑 BECCA ───────→ 🚁 Scout ──�
 - Scout creates `TODO_<PROJECT>.md` with task list, sequential IDs
 - Scout says: **"TODO created. First task: <task>. Activate Ant? → I AM"**
 
+**0c. [CONDITIONAL] BECCA assesses → Planner activates**
+- BECCA checks: tasks >3, any task has >3 files, or `.neo/inbox/ideas/` non-empty
+- If YES → BECCA says: **"Planning needed. Activate Planner? → I AM"**
+- If NO → skip to step 1 (straight to Ant)
+- Operator says "I AM" → Planner (👔 Board Ant) activates
+- Planner reads inbox ideas + Scout TODO + Hive Mind → produces SKELETON
+- Gate: **"⏸️ PLAN SKELETON OK?"** → operator approves
+- Planner enriches tasks in batches → writes TASK_PACKETs to `.neo/inbox/`
+- Gate per batch: **"⏸️ TASK BATCH <N> OK?"** → operator approves
+- Planner writes RUN_PLAN → updates TODO with sequenced, dependency-mapped tasks
+- Gate: **"⏸️ RUN PLAN OK? Activate first Ant? → I AM"**
+
 **1. Operator says "I AM" → Ant activates (task #1)**
 - Ant reads `roles/NEO-ANT.md` (its prompt)
 - Ant reads the TODO → finds task #1 (first ⬜ QUEUED task)
@@ -158,8 +258,12 @@ Operator ────→ 👑 BECCA ───────→ 🚁 Scout ──�
 - Inspector updates TODO: marks Inspector stage (✅ or ❌), adds report path
 - Inspector says: **"Inspector [PASS/FAIL]. Report at `<path>`. Next task? → I AM"**
 
-**5. Operator says "I AM" → Ant activates (task #2)**
-- Cycle repeats for next ⬜ QUEUED task
+**5. Operator says "I AM" → next Ant activates**
+- BECCA briefly reactivates to:
+  (a) **LESSON REINFORCEMENT** — update Success/Failure in LESSONS_INDEX for previous task (based on Ghost verdict + loop count)
+  (b) **HIVE CONTEXT ENRICHMENT** — populate next task packet from Hive Mind indexes
+- Then Ant activates for next ⬜ QUEUED task
+- Cycle repeats until all tasks complete
 
 **6. When all tasks are done → BECCA reactivates**
 - Inspector says: **"All tasks complete. Activate BECCA for final verification? → I AM"**
@@ -201,8 +305,45 @@ Each rejection adds a **loop counter** to the task in the TODO:
 **Loops:** 0 → 1 (Ghost rejected: missing tests) → 2 (Inspector fail: NUCLEAR finding)
 ```
 
-After **3 loops** on the same task, the role MUST flag it:
-**"⚠️ Task <ID> has looped 3 times. Operator review recommended before continuing."**
+### Strike 3 — Debugger Escalation
+
+After **3 loops** (rejections) on the same task, the pipeline escalates instead of retrying:
+
+| Loop | What Happens |
+|------|-------------|
+| 1 | Ghost/Inspector rejects → same Ant retries (standard re-entry) |
+| 2 | Ghost/Inspector rejects again → same Ant retries (last chance) |
+| 3 | **STRIKE 3** — Ghost presents escalation prompt → BECCA reactivates |
+
+**At Strike 3, BECCA analyzes the rejection pattern and decides:**
+- **DEBUGGER** — same deficiency repeated or different issues each time → 🐛 Debugger Ant diagnoses root cause
+- **SPLIT** — scope too large for one task → BECCA breaks into sub-tasks
+- **RE-ASSIGN** — wrong Ant type → BECCA assigns correct type, resets loop counter
+
+**The Ant does NOT retry a 4th time.** Diagnosis comes before more fix attempts.
+
+### Strike 3 Decision Matrix
+
+BECCA reads ALL Ghost/Inspector reviews for the task and applies these criteria:
+
+| Signal | → Decision | Rationale |
+|--------|-----------|-----------|
+| Same deficiency repeated 2-3 times (e.g., "missing budget ledger" every loop) | **DEBUGGER** | Ant doesn't understand the requirement — needs root cause diagnosis |
+| Different deficiency each loop (loop 1: evidence, loop 2: surgical, loop 3: compliance) | **DEBUGGER** | Ant is patching symptoms — Debugger maps the full problem |
+| Ghost notes "scope too large" or "too many files" in any review | **SPLIT** | Task exceeds single-Ant capacity — break into sub-tasks |
+| Task touches 5+ files across 3+ directories | **SPLIT** | Scope indicator even if Ghost didn't flag it explicitly |
+| Ghost notes "wrong Ant type" or deficiencies are domain-specific (e.g., security gaps on a Carpenter task) | **RE-ASSIGN** | Ant type mismatch — assign correct specialist |
+| Ant type doesn't match the dominant deficiency category (e.g., 🛠️ Carpenter failing NUCLEAR checks) | **RE-ASSIGN** | Implicit type mismatch |
+
+**Tie-breaker:** If multiple signals match, prefer DEBUGGER (diagnosis before action).
+
+```
+Strike 3 flow:
+  Ant fails (loop 3) → Ghost presents STRIKE 3 prompt →
+  Operator "I AM" → BECCA reactivates →
+  BECCA reads all Ghost reviews → decides DEBUGGER / SPLIT / RE-ASSIGN →
+  Operator "I AM" → appropriate action taken
+```
 
 ---
 
@@ -509,8 +650,12 @@ All commands are manual. The role MUST acknowledge the command before acting on 
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  NEO-ACTIVATION v1.4.0 — QUICK REFERENCE                        │
+│  NEO-ACTIVATION v1.10.0 — QUICK REFERENCE                       │
 ├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  🛑 RESPONSE BOUNDARY: ONE GATE PER RESPONSE. STOP AT EACH.     │
+│  After gate output → write ⏸️ prompt → STOP. Wait for operator. │
+│  Two gates in one response = PROTOCOL VIOLATION.                 │
 │                                                                  │
 │  EVERYTHING STARTS AND ENDS WITH BECCA.                          │
 │                                                                  │
@@ -530,7 +675,8 @@ All commands are manual. The role MUST acknowledge the command before acting on 
 │  "I AM" → 🐜 Ant → "I AM" → 👻 Ghost → "I AM" → 🔍 Inspector  │
 │                                                                  │
 │  REJECTION: Ghost ❌ or Inspector ❌ → "I AM" → back to Ant      │
-│  MAX LOOPS: 3 per task, then flag for operator review            │
+│  STRIKE 3: 3rd rejection → Ghost escalates → BECCA reactivates  │
+│    → BECCA decides: DEBUGGER / SPLIT / RE-ASSIGN (no 4th retry)  │
 │                                                                  │
 │  BECCA VERIFY (end of run):                                      │
 │  • Did any Ant break a previous Ant's work? → REGRESSION         │
@@ -552,6 +698,10 @@ All commands are manual. The role MUST acknowledge the command before acting on 
 │  CARDINAL RULE: Only "I AM" transitions roles.                   │
 │  No self-activation. No auto-chaining. No shortcuts.             │
 │                                                                  │
+│  🚫 ANTI-BYPASS: "fix all" / "do everything" / "handle it"      │
+│  = CONTEXT for RECON, NOT permission to skip gates.              │
+│  No operator phrase overrides the gate system. EVER.             │
+│                                                                  │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -559,53 +709,11 @@ All commands are manual. The role MUST acknowledge the command before acting on 
 
 ## Changelog
 
-### [1.4.0] 2026-02-11
-- PROJECT LOCK binding (FROZEN): every role activated via "I AM" inherits the locked project root
-- Lock set by BECCA during RECON, persists through CLOSE, only new "deep dive" creates new lock
-- Ant activation response: now shows CHECKPOINT state, PROJECT LOCK, and scope
-- BECCA activation response: now mentions PROJECT LOCK will be set after RECON
-- Quick Reference: PROJECT LOCK + CHECKPOINT FIRST sections added
-- Cross-reference: V-10 (project lock violation) in NEO-GATES.md v1.5.0
-- ALL additions are MANUAL ONLY — NO AUTOMATION
+### v1.10.0 (2026-03-02)
+- **ANTI-BYPASS CLAUSE** — Section 0b: operator convenience phrases ("fix all", "do everything") are CONTEXT for RECON, not permission to skip gates. No operator instruction overrides the gate system. Only explicit "OVERRIDE" escape hatch.
 
-### [1.3.0] 2026-02-10
-- Hive Mind: .neo/index/ directory added to project file paths
-- STATE.md: now tracks Last Pheromone ID (PH-NNN)
-- BECCA CLOSE: now updates HIVE indexes alongside STATE.md and RUN_INDEX.md
-- Quick Reference: HIVE line added, CLOSE updates list updated
-- ALL additions are MANUAL ONLY — NO AUTOMATION
+### v1.9.0 (2026-03-02)
+- **Inter-task BECCA behavior** — step 5 now explicitly shows BECCA's brief reactivation between tasks for (a) lesson reinforcement and (b) HIVE CONTEXT enrichment
 
-### [1.2.0] 2026-02-09
-- RUN_INDEX.md: BECCA's institutional memory — one entry per completed run
-- BECCA CLOSE protocol: step 5 appends run summary to RUN_INDEX.md
-- BECCA CLOSE output: mentions "Run index updated"
-- Section 9: added .neo/RUN_INDEX.md format alongside STATE.md
-- Quick Reference: added INDEX line + CLOSE updates list
-- ALL additions are MANUAL ONLY — NO AUTOMATION
-
-### [1.1.0] 2026-02-09
-- BECCA orchestration: everything starts and ends with BECCA
-- BECCA RECON: checks .neo/STATE.md, prior TODOs, last task ID, run counter
-- BECCA SCOUT dispatch: "I AM" → 🚁 Scout surveys project → creates TODO
-- BECCA VERIFY: final regression check — did any Ant break previous Ant's work?
-- BECCA CLOSE: archives TODO, updates STATE.md, signs off on run
-- Task ID continuity: global per project, never reset, tracked in STATE.md
-- .neo/STATE.md format: last run, last task ID, status
-- Updated pipeline flow diagram to show BECCA at both ends
-- BECCA activation response added to Section 7
-- Updated Quick Reference with full BECCA-bookended flow
-- ALL transitions are MANUAL ONLY — NO AUTOMATION
-
-### [1.0.0] 2026-02-09
-- Initial release
-- "I AM" protocol: universal role activation trigger
-- Tactical TODO: shared coordination document per project
-- Pipeline flow: Ant → Ghost → Inspector per task
-- Rejection loops: Ghost/Inspector reject → back to Ant (max 3 loops)
-- Same-chat rules: one role at a time, TODO is single source of truth
-- Cross-session continuity: TODO persists, new session reads where left off
-- Archival protocol: all tasks done → move TODO to archive/
-- TODO update rules: status icons, who writes what, chat-first/file-second
-- Operator commands: I AM, SKIP INSPECTOR, SKIP GHOST, PAUSE, ABORT
-- Inspired by IAMBecca ACTIVATION (packets), QUEUE (distribution), LEDGER (logging)
-- ALL transitions are MANUAL ONLY — NO AUTOMATION
+### v1.8.0 (2026-02-27)
+- Loop Tracking, Strike 3 Decision Matrix, Response Boundary Protocol

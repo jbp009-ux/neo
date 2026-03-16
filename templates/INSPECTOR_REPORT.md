@@ -79,6 +79,46 @@ DATE: <YYYY-MM-DD>
 
 ---
 
+## 7. CARD RECEIPT (CDEX — MANDATORY)
+
+> "If it didn't produce a receipt, it isn't accepted."
+
+| Field | Value |
+|-------|-------|
+| deck_id | DECK-<TASK_ID> |
+| policy_pack | PP-<YYYY-MM-DD> |
+| cards_executed | <count> |
+| cards_skipped | <count> |
+| blockers | <count or NONE> |
+
+### Card Outputs
+
+| Card ID | Card Title | Status | Output Artifact |
+|---------|-----------|--------|-----------------|
+| CORE-001 | Load Policy Pack | EXECUTED/SKIPPED | <artifact or N/A> |
+| CORE-003 | Scope Lock | EXECUTED/SKIPPED | <artifact or N/A> |
+| CORE-004 | Evidence Capture Plan | EXECUTED/SKIPPED | <artifact or N/A> |
+| CORE-005 | Post-Change Verification | EXECUTED/SKIPPED | <artifact or N/A> |
+| TASK-INS-001 | INSPECTOR_AUDIT | EXECUTED | <this report> |
+| TASK-INS-002 | INSPECTOR_VERDICT | EXECUTED | <Section 5 above> |
+
+### Card Waivers (if any)
+
+| Card ID | Reason | Risk | Mitigation | Approver |
+|---------|--------|------|------------|----------|
+| <card_id> | <reason> | <risk level> | <mitigation> | <operator/BECCA> |
+
+*(If no waivers: "No cards were waived.")*
+
+<!--
+  Ghost will REJECT Inspector reports without this section.
+  Every executed card must show acceptance criteria met.
+  "If it isn't on a card, it didn't happen."
+  "If it didn't produce a receipt, it isn't accepted."
+-->
+
+---
+
 ## APPROVAL
 
 🔑 <INSPECTOR PASS / INSPECTOR PASS WITH FINDINGS / INSPECTOR FAIL: <blocker count> blockers>

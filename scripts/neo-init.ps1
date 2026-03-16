@@ -36,6 +36,13 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+# ── UTF-8 without BOM helper (PowerShell 5.x adds BOM with -Encoding UTF8) ──
+$Utf8NoBom = New-Object System.Text.UTF8Encoding $false
+function Write-Utf8NoBom {
+    param([string]$Path, [string]$Content)
+    [System.IO.File]::WriteAllText($Path, $Content, $Utf8NoBom)
+}
+
 # ── Source paths ──────────────────────────────────────────────────────
 $NeoRoot = Join-Path $PSScriptRoot ".."
 $SourceRoles     = Join-Path $NeoRoot "roles"
@@ -43,6 +50,8 @@ $SourceShared    = Join-Path $NeoRoot "shared"
 $SourceTemplates = Join-Path $NeoRoot "templates"
 $SourceScripts   = Join-Path $NeoRoot "scripts"
 $SourcePrompts   = Join-Path $NeoRoot "prompts"
+$SourceInjections = Join-Path $NeoRoot "injections"
+$SourceCards      = Join-Path $NeoRoot "cards"
 
 # ── Target paths ─────────────────────────────────────────────────────
 $TargetNeo = Join-Path $ProjectPath ".neo"
@@ -53,7 +62,7 @@ if ((Test-Path $TargetNeo) -and -not $Force) {
 }
 
 Write-Host "" -ForegroundColor Cyan
-Write-Host "  NEO INIT v2.3 — Deploying pipeline" -ForegroundColor Cyan
+Write-Host "  NEO INIT v2.5 — Deploying pipeline" -ForegroundColor Cyan
 Write-Host "  Target: $ProjectPath" -ForegroundColor Cyan
 Write-Host ""
 
@@ -94,7 +103,9 @@ $governanceDirs = @(
     @{ Source = $SourceShared;    Target = Join-Path $TargetNeo "shared" },
     @{ Source = $SourceTemplates; Target = Join-Path $TargetNeo "templates" },
     @{ Source = $SourceScripts;   Target = Join-Path $TargetNeo "scripts" },
-    @{ Source = $SourcePrompts;   Target = Join-Path $TargetNeo "prompts" }
+    @{ Source = $SourcePrompts;   Target = Join-Path $TargetNeo "prompts" },
+    @{ Source = $SourceInjections; Target = Join-Path $TargetNeo "injections" },
+    @{ Source = $SourceCards;      Target = Join-Path $TargetNeo "cards" }
 )
 
 foreach ($dir in $governanceDirs) {
@@ -107,6 +118,8 @@ foreach ($dir in $governanceDirs) {
 # ── 2. Create project-specific working directories ───────────────────
 $workDirs = @(
     "inbox",
+    "inbox\ideas",
+    "inbox\ideas\completed",
     "outbox\ants",
     "outbox\ghost",
     "outbox\inspector",
@@ -126,6 +139,14 @@ foreach ($wd in $workDirs) {
     }
 }
 
+# ── 2b. Copy INBOX_README.md to inbox/ideas/ ────────────────────────
+$inboxReadmeSrc = Join-Path $SourceTemplates "INBOX_README.md"
+$inboxReadmeDst = Join-Path $TargetNeo "inbox\ideas\README.md"
+if (Test-Path $inboxReadmeSrc) {
+    Copy-Item -Path $inboxReadmeSrc -Destination $inboxReadmeDst -Force
+    Write-Host "  Copied INBOX_README.md -> inbox/ideas/README.md" -ForegroundColor Green
+}
+
 # ── 3. Write STATE.md ────────────────────────────────────────────────
 $projectName = (Split-Path $ProjectPath -Leaf).ToUpper()
 $stateFile = Join-Path $TargetNeo "STATE.md"
@@ -137,12 +158,17 @@ $stateContent = @"
 **Last Run:** 0
 **Last Task ID:** TASK-000
 **Last Pheromone ID:** PH-000
+**Last Lesson ID:** L-000
+**Last Rejection ID:** REJ-000
 **Status:** INITIALIZED
 **Initialized:** $today
 **Source:** $NeoRoot
+**CLOSE_PROGRESS:** NONE
+**CLOSE_LAST_CARD:** —
+**CLOSE_LAST_CHECKPOINT:** —
 "@
 
-Set-Content -Path $stateFile -Value $stateContent -Encoding UTF8
+Write-Utf8NoBom -Path $stateFile -Content $stateContent
 Write-Host "  Wrote STATE.md" -ForegroundColor Green
 
 # ── 4. Write RUN_INDEX.md from template ──────────────────────────────
@@ -181,7 +207,7 @@ $indexContent = @"
 <!-- Cross-run observations, recurring patterns, deferred findings -->
 "@
 
-Set-Content -Path $indexFile -Value $indexContent -Encoding UTF8
+Write-Utf8NoBom -Path $indexFile -Content $indexContent
 Write-Host "  Wrote RUN_INDEX.md" -ForegroundColor Green
 
 # ── 5. Remove legacy NEO_STATE.json if present ────────────────────────
@@ -206,7 +232,7 @@ TODO_*.md
 CRITICAL_SURFACES.md
 "@
 
-Set-Content -Path (Join-Path $TargetNeo ".gitignore") -Value $gitignore -Encoding UTF8
+Write-Utf8NoBom -Path (Join-Path $TargetNeo ".gitignore") -Content $gitignore
 Write-Host "  Wrote .neo/.gitignore" -ForegroundColor Green
 
 # ── 7. Seed hive mind index files ─────────────────────────────────────
@@ -218,7 +244,7 @@ $masterContent = @"
 <!-- Format: TASK_ID|DATE|ANT_TYPE|RISK|FILES_TOUCHED|VERDICT|EVIDENCE_SCORE|PHEROMONE_SUMMARY|FINGERPRINT -->
 <!-- Search: grep "filename" index/MASTER_INDEX*.md -->
 "@
-Set-Content -Path (Join-Path $indexDir "MASTER_INDEX_001.md") -Value $masterContent -Encoding UTF8
+Write-Utf8NoBom -Path (Join-Path $indexDir "MASTER_INDEX_001.md") -Content $masterContent
 
 # FILE_OWNERSHIP shards (created on demand by BECCA — seed with empty marker)
 $foContent = @"
@@ -226,7 +252,7 @@ $foContent = @"
 <!-- BECCA creates shards as needed: FILE_OWNERSHIP_src_functions.md, etc. -->
 <!-- This seed file can be deleted once real shards exist -->
 "@
-Set-Content -Path (Join-Path $indexDir "FILE_OWNERSHIP_SEED.md") -Value $foContent -Encoding UTF8
+Write-Utf8NoBom -Path (Join-Path $indexDir "FILE_OWNERSHIP_SEED.md") -Content $foContent
 
 # PHEROMONE severity shards (5 files)
 $phSeverities = @("NUCLEAR", "HIGH", "MEDIUM", "LOW", "INFO")
@@ -239,10 +265,37 @@ foreach ($sev in $phSeverities) {
 | ID | Task | File:Line | Category | Message | Status |
 |----|------|-----------|----------|---------|--------|
 "@
-    Set-Content -Path (Join-Path $indexDir "PHEROMONE_$sev.md") -Value $phContent -Encoding UTF8
+    Write-Utf8NoBom -Path (Join-Path $indexDir "PHEROMONE_$sev.md") -Content $phContent
 }
 
-Write-Host "  Seeded 7 index files in index/" -ForegroundColor Green
+# LESSONS_INDEX seed (general domain)
+$lessonsContent = @"
+# LESSONS_INDEX — general
+
+<!-- Lessons that don't fit a specific domain shard -->
+<!-- Format: ## L-NNN: <title> (TASK-NNN, YYYY-MM-DD) -->
+"@
+Write-Utf8NoBom -Path (Join-Path $indexDir "LESSONS_INDEX_general.md") -Content $lessonsContent
+
+# REJECTION_INDEX seed
+$rejContent = @"
+# REJECTION_INDEX — All Rejections Across Runs
+
+<!-- Format: ## REJ-NNN: <short reason> (TASK-NNN, YYYY-MM-DD) -->
+<!-- Categories: EVIDENCE | COMPLIANCE | SURGICAL | NUCLEAR | HIVE | QUALITY | DOD -->
+"@
+Write-Utf8NoBom -Path (Join-Path $indexDir "REJECTION_INDEX.md") -Content $rejContent
+
+# FINDINGS_INDEX seed
+$findingsContent = @"
+# FINDINGS_INDEX — Aggregated Ghost/Inspector Findings Across Runs
+
+| Finding Type | Category | Severity | Count | First Seen | Last Seen | Source | Status |
+|--------------|----------|----------|-------|------------|-----------|--------|--------|
+"@
+Write-Utf8NoBom -Path (Join-Path $indexDir "FINDINGS_INDEX.md") -Content $findingsContent
+
+Write-Host "  Seeded 10 index files in index/" -ForegroundColor Green
 
 # ── 8. Generate CLAUDE.md in project root ────────────────────────────
 $claudeFile = Join-Path $ProjectPath "CLAUDE.md"
@@ -277,11 +330,11 @@ if (Test-Path $claudeTemplate) {
     $claudeContent = $claudeContent -replace '\{\{NUCLEAR_INVARIANTS\}\}', '(Update this with your project nuclear invariants)'
     $claudeContent = $claudeContent -replace '\{\{KEY_PATHS\}\}', '(Update this with your project key paths)'
 
-    Set-Content -Path $claudeFile -Value $claudeContent -Encoding UTF8
+    Write-Utf8NoBom -Path $claudeFile -Content $claudeContent
     Write-Host "    [CREATED] CLAUDE.md in project root" -ForegroundColor Green
     Write-Host "    NOTE: Edit CLAUDE.md to add project-specific stack, commands, and invariants" -ForegroundColor Yellow
 } else {
-    Write-Host "    [SKIP] templates/CLAUDE_PROJECT.md not found — CLAUDE.md not generated" -ForegroundColor Yellow
+    Write-Host "    [SKIP] templates/CLAUDE_PROJECT.md not found - CLAUDE.md not generated" -ForegroundColor Yellow
 }
 
 # ── Done ─────────────────────────────────────────────────────────────
@@ -290,17 +343,19 @@ Write-Host "  NEO pipeline initialized in: $TargetNeo" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  Deployed:" -ForegroundColor Green
 Write-Host "    roles/       4 roles (BECCA, Ant, Ghost, Inspector)" -ForegroundColor Green
-Write-Host "    shared/      6 modules (Activation, Gates, Evidence, Outputs, Tools, Hive)" -ForegroundColor Green
-Write-Host "    templates/   12 templates" -ForegroundColor Green
+Write-Host "    shared/      9 modules (Activation, Gates, Evidence, Outputs, Tools, Hive, Surgical, HiveMind-Global, Five-Horsemen)" -ForegroundColor Green
+Write-Host "    templates/   18 templates" -ForegroundColor Green
 Write-Host "    scripts/     neo-init.ps1, neo-refresh.ps1" -ForegroundColor Green
-Write-Host "    prompts/     Specialized Ant prompts (Color Expert)" -ForegroundColor Green
-Write-Host "    index/       7 hive mind index files (seeded)" -ForegroundColor Green
+Write-Host "    prompts/     Specialized Ant prompts (Color Expert, Figma, QA, Debugger, Prompt Architect)" -ForegroundColor Green
+Write-Host "    injections/  7 safety injections (paste mid-session)" -ForegroundColor Green
+Write-Host "    cards/       33 protocol cards (phase-specific instructions)" -ForegroundColor Green
+Write-Host "    index/       10 hive mind index files (seeded)" -ForegroundColor Green
 Write-Host "    STATE.md     Run counter + task ID + pheromone ID tracker" -ForegroundColor Green
 Write-Host "    RUN_INDEX.md BECCA's institutional memory" -ForegroundColor Green
-Write-Host "    CLAUDE.md    Claude Code guide (project root — tells Claude about NEO)" -ForegroundColor Green
+Write-Host "    CLAUDE.md    Claude Code guide (project root - tells Claude about NEO)" -ForegroundColor Green
 Write-Host ""
 Write-Host "  Next steps:" -ForegroundColor Yellow
-Write-Host "    1. Edit CLAUDE.md in project root — add stack, commands, nuclear invariants" -ForegroundColor Yellow
+Write-Host "    1. Edit CLAUDE.md in project root - add stack, commands, nuclear invariants" -ForegroundColor Yellow
 Write-Host "    2. (Optional) Copy templates/CRITICAL_SURFACES.md to .neo/ and customize" -ForegroundColor Yellow
 Write-Host "    3. Tell BECCA: 'deep dive into $projectName'" -ForegroundColor Yellow
 Write-Host "    4. BECCA will RECON, dispatch Scout, create TODO" -ForegroundColor Yellow

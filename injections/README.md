@@ -12,6 +12,7 @@ Targeted safety and guidance modules that operators can paste into Ant sessions 
 | `STOP_PROTOCOL.md` | Any STOP condition triggered | Ant needs to halt and report |
 | `STRIKE_TWO.md` | Authorizing a second fix attempt | First patch failed, giving one more try |
 | `SCOPE_LOCK.md` | Ant drifting outside FOOTPRINT | "While I was there" changes detected |
+| `GATE_ENFORCEMENT.md` | Ant skipping pipeline gates | Gate output missing or multiple gates in one response |
 
 ## Usage
 

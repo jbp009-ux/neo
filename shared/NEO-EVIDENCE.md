@@ -1,7 +1,7 @@
-# NEO-EVIDENCE v1.3.0
+# NEO-EVIDENCE v1.9.0
 ## Evidence Contract — No Claims Without Proof
 
-**Purpose:** Evidence requirements, rejected patterns, validation rules, pheromone system, evidence budget, hive mind context, surgical protocol evidence
+**Purpose:** Evidence requirements, rejected patterns, validation rules, pheromone system, evidence budget, hive mind context, surgical protocol evidence, feature protection evidence, budget ledger, command proof, nearest truth rule, SaaS safety evidence (tenant isolation, audit trail, data classification, environment)
 **Scope:** Loaded by ALL NEO roles (Ant, Ghost, Inspector)
 
 ---
@@ -38,6 +38,20 @@
 | Dry-run result | environment + input dataset + output comparison + pass/fail |
 | Data op classification | file + change type + data op type + backup required + write semantics |
 | Understanding proof | current behavior + design intent + hidden constraints + blast radius |
+| Feature impact | feature name + impact level (NONE/REDUCED/RELOCATED/REMOVAL) + override token if removal |
+| Feature inventory | feature name + files before/after + exports before/after + delta + status |
+| Non-existence claim | feature/code name + grep commands run + search scope + result count (must be 0) |
+| Budget ledger | resource type + budget + used + remaining + status (✅/⚠️/🛑) |
+| Command proof | actual grep/glob command + verbatim output + interpretation |
+| Discovery strategy | one question + first file + search plan + answer with evidence reference |
+| Truthy diffs | 7-step checklist (all PASS or failure identified + STOP) |
+| Tenant isolation scan | tenant boundary + unscoped query count + collection group check + verdict |
+| Secret scan | grep patterns run + findings (type only, never value) + location |
+| Data classification | field/collection + tier (T1-T4) + PII flag + handling rule |
+| Environment declaration | TARGET_ENVIRONMENT (EMULATOR/STAGING/PRODUCTION) + dry-run evidence if prod |
+| Destructive op log | operation + target + before state + after state + reversible flag |
+| Restore test | test environment + records backed up + records restored + sample verified + result |
+| NUCLEAR incident report | task + trigger + file + evidence + blast radius + immediate risk + recommended action |
 
 ---
 
@@ -116,6 +130,27 @@ Test output that doesn't match actual runs. Diffs that don't match actual files.
 - [ ] Data operation classification present in FOOTPRINT (if data ops involved)
 - [ ] Backup proof documented (if data ops involved)
 - [ ] Dry-run evidence present (if destructive ops: DELETE/MIGRATION/SEED/PUT)
+- [ ] Feature Impact table present in FOOTPRINT (all affected features listed)
+- [ ] Feature Inventory table present in VERIFY (before/after counts for all features in scope)
+- [ ] No feature count decreased without `🔑 FEATURE REMOVAL OVERRIDE`
+- [ ] Non-existence claims backed by grep evidence (if any "doesn't exist" assertions made)
+- [ ] Discovery Strategy present (ONE QUESTION stated before reading code)
+- [ ] Budget Ledger present at end of DISCOVERY (files/lines/greps tracked with real numbers)
+- [ ] Command Proof in Hive Mind Briefing (actual grep commands + output, not "I checked")
+- [ ] Truthy Diffs checklist present in PATCH output (7/7 or failure + STOP)
+- [ ] Discovery Strategy question answered in DISCOVERY output with evidence
+- [ ] Source conflicts reported if found (Nearest Truth Rule — Section 14)
+- [ ] No silent resolution of conflicting sources (code vs manual vs reports)
+- [ ] Tenant Isolation Scan performed in DISCOVERY (if multi-tenant project)
+- [ ] Secret scan performed in DISCOVERY (grep for secret patterns)
+- [ ] Data Classification table present (if task involves data operations)
+- [ ] TARGET_ENVIRONMENT declared in FOOTPRINT
+- [ ] If PRODUCTION + destructive: 🔑 PRODUCTION CONFIRMED obtained
+- [ ] If PRODUCTION + destructive: dry-run evidence from emulator/staging provided
+- [ ] Destructive Operation Log present (if any destructive operations performed)
+- [ ] Restore Test Proof present (if DATA_DELETE or MIGRATION)
+- [ ] No T1/T2 (PII) data pasted in reports (use anonymized data or doc IDs)
+- [ ] No secret values in reports (report type and location only)
 
 ### For Ghost (before approving)
 - [ ] All evidence paths verified as real files
@@ -128,6 +163,28 @@ Test output that doesn't match actual runs. Diffs that don't match actual files.
 - [ ] Backup proof verified (if data ops — timestamped, restorable, location documented)
 - [ ] No assumption-based changes detected (anti-assumption rules A-01 → A-08)
 - [ ] Write semantics justified (PUT/DELETE operations have explicit rationale)
+- [ ] Feature Impact table reviewed — impact levels match actual changes
+- [ ] Feature Inventory counts verified — deltas match actual file state
+- [ ] Non-existence claims independently verified (Ghost MUST grep independently — see Section 13.5)
+- [ ] No scope contraction detected (features removed that weren't in task scope)
+- [ ] Discovery Strategy present and question answered with evidence
+- [ ] Budget Ledger numbers match actual citations in DISCOVERY (spot-check file count)
+- [ ] Command Proof spot-checked (2 grep claims from Hive Mind Briefing verified plausible)
+- [ ] Truthy Diffs 7/7 present in PATCH output — cross-check FOOTPRINT match + ghost files
+- [ ] Operator Manual currency checked (if exists, flag if > 5 runs stale)
+- [ ] Source conflicts reported (if Ant found conflicting info between code/manual/reports — Section 14)
+- [ ] No silent resolution: Ant did not silently pick one source over another without reporting conflict
+- [ ] Tenant Isolation Scan present (if multi-tenant) — verify Ant actually grepped for unscoped queries
+- [ ] Secret scan present — verify Ant ran grep for secret patterns
+- [ ] TARGET_ENVIRONMENT declared in FOOTPRINT — reject if missing (S-35)
+- [ ] If PRODUCTION: verify 🔑 PRODUCTION CONFIRMED obtained for destructive ops
+- [ ] If PRODUCTION: verify dry-run evidence from emulator/staging exists
+- [ ] Data Classification table present and tiers correct (if data ops)
+- [ ] Destructive Operation Log present and complete (if destructive ops)
+- [ ] Restore Test Proof present (if DATA_DELETE or MIGRATION) — not just "verified: YES"
+- [ ] No PII (T1/T2) leaked in report (check for real emails, names, phone numbers)
+- [ ] No secrets leaked in report (check for API keys, tokens, passwords)
+- [ ] NUCLEAR = HALT verified — if Ant detected NUCLEAR, did they HALT? (V-13 check)
 
 ### For Inspector (during audit)
 - [ ] Evidence format follows NEO-EVIDENCE standards
@@ -299,7 +356,7 @@ PASS 2 (if needed):     Request expansion → Read more → Confirm/revise
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│  NEO-EVIDENCE v1.3.0 — QUICK REFERENCE                                     │
+│  NEO-EVIDENCE v1.9.0 — QUICK REFERENCE                                     │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
 │  DOCTRINE: No claims without proof. Period.                                 │
@@ -336,6 +393,35 @@ PASS 2 (if needed):     Request expansion → Read more → Confirm/revise
 │  LAW 3: Dry-run evidence (for DELETE/MIGRATION/SEED/PUT)                   │
 │  Ghost checks: No assumption patterns, write semantics justified           │
 │                                                                             │
+│  FEATURE PROTECTION EVIDENCE (NEO-SURGICAL.md Section 6b):                │
+│  Ant provides: Feature Impact (FOOTPRINT) + Feature Inventory (VERIFY)    │
+│  Ghost MUST: independently verify non-existence claims (grep + git log)   │
+│  Ghost MUST: cross-check feature file/export counts independently         │
+│  Ghost MUST: detect scope contraction ("consolidated"/"simplified")        │
+│  Negative delta without 🔑 FEATURE REMOVAL OVERRIDE = REJECT             │
+│                                                                             │
+│  COLONY OS PROOF-FORCING EVIDENCE (v1.5.0):                              │
+│  Discovery Strategy: ONE QUESTION + first file + search plan + answer     │
+│  Budget Ledger: files/lines/greps tracked — real numbers, not claims      │
+│  Command Proof: actual grep commands + output in Hive Mind Briefing       │
+│  Truthy Diffs: 7-step pre-commit checklist in PATCH output                │
+│  Ghost spot-checks: 2 grep claims + budget numbers + FOOTPRINT match      │
+│                                                                             │
+│  NEAREST TRUTH RULE (v1.6.0 — Section 14):                               │
+│  Code > Config > Manual > Reports > External Docs                         │
+│  If sources conflict: REPORT the conflict, do NOT silently pick a side    │
+│  The Stale Manual Trap: code says feature exists → manual says removed    │
+│  → Code outranks Manual. REPORT conflict. Do NOT delete.                  │
+│                                                                             │
+│  SAAS SAFETY EVIDENCE (v1.7.0 — Section 15):                             │
+│  🏢 Tenant Isolation Scan in DISCOVERY (multi-tenant projects)            │
+│  🌍 TARGET_ENVIRONMENT in FOOTPRINT (S-35 if missing)                    │
+│  🔒 Secret scan in DISCOVERY (grep for secret patterns)                  │
+│  🔴 Data Classification: T1 Restricted → T4 Public                       │
+│  💥 Destructive Op Log + Restore Test Proof (audit trail)                │
+│  ⚫ NUCLEAR = HALT → INCIDENT REPORT → 🔑 NUCLEAR RESOLVED             │
+│  No PII in reports. No secrets in reports. Anonymize or use doc IDs.     │
+│                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -343,122 +429,102 @@ PASS 2 (if needed):     Request expansion → Read more → Confirm/revise
 
 ## 12) Hive Mind Evidence Requirements
 
-When an Ant performs a Hive Mind Check (see `NEO-HIVE.md`), the following evidence is required in Section 10: HIVE CONTEXT of the Ant report:
-
-### Required Hive Evidence
-
-| Evidence | Format | Required? |
-|----------|--------|-----------|
-| Previous tasks on target files | Task IDs from MASTER_INDEX grep output | YES |
-| File modification history | Summary from FILE_OWNERSHIP | YES |
-| Active pheromones on target files | Pheromone IDs + details from PHEROMONE_REGISTRY | YES (if any) |
-| High-traffic flag | "N previous tasks" per file | YES (if > 5) |
-| NUCLEAR clearance | Operator clearance logged | YES (if NUCLEAR active) |
-| First-run note | "First run — no hive data" | YES (if index empty) |
-
-### Ghost Validation
-
-Ghost MUST verify hive context claims by:
-1. Spot-checking at least 2 claims against actual `.neo/index/` files
-2. Confirming NUCLEAR pheromones were acknowledged (if applicable)
-3. Confirming high-traffic files were flagged (if applicable)
-
-### Evidence Budget Note
-
-Hive Mind Check greps do NOT count against the DISCOVERY evidence budget (Section 10). Index reads are pre-DISCOVERY and are exempt from the anti-drowning protocol.
+> **Full specification:** See `shared/NEO-HIVE.md` (index formats + query patterns) and `roles/NEO-ANT.md` DISCOVERY step 0 (Hive Mind Check procedure).
+> **Key rule:** Hive Mind Check greps do NOT count against the DISCOVERY evidence budget. Index reads are pre-DISCOVERY and exempt.
+> **Ghost validation:** Spot-check at least 2 claims against actual `.neo/index/` files.
 
 ---
 
 ## 13) Surgical Protocol Evidence (NEO-SURGICAL.md)
 
-When tasks involve data operations, the following additional evidence is required.
-
-### 13.1 Understanding Proof (LAW 1)
-
-Before ANY code or data change, the Ant MUST document evidence of understanding:
-
-| Check | Evidence Required |
-|-------|-------------------|
-| Current behavior | Code paths read + test output showing current state |
-| Design intent | Comments, commit history, or operator confirmation |
-| Hidden constraints | Guardrails identified in code |
-| Blast radius | Affected tenants / data scope at scale |
-
-**If ANY check cannot be evidenced: STOP. Do NOT proceed.**
-
-### 13.2 Backup Proof (LAW 2)
-
-Required when FOOTPRINT contains `DATA_WRITE`, `DATA_DELETE`, `MIGRATION`, `SEED`, or `CONFIG_WRITE`:
-
-| Field | Required Format |
-|-------|----------------|
-| Timestamp | ISO 8601 |
-| Location | Actual path or export location (not placeholder) |
-| Scope | What was backed up (collections, files, configs) |
-| Restore method | Exact commands/steps to restore |
-| Restore verified | YES/NO + how verified |
-| Size / record count | Number of records or file size |
-
-**Backup proof is presented to operator BEFORE `🔑 BACKUP APPROVED` token.**
-
-### 13.3 Dry-Run Evidence (Destructive Ops)
-
-Required for `DATA_DELETE`, `MIGRATION`, `SEED`, and any `PUT` (replace) semantics:
-
-| Field | Required Format |
-|-------|----------------|
-| Environment | Where dry-run was executed (emulator, staging, test tenant) |
-| Input dataset | What data existed before |
-| Output dataset | What data looked like after |
-| Comparison | Expected vs actual (including preserved records) |
-| Tenant isolation | Confirmed intact / not applicable |
-
-**Dry-run evidence appears in the Ant's VERIFY section.**
-
-### 13.4 Anti-Assumption Evidence
-
-Ghost checks for assumption patterns — signs that an Ant "fixed" something without understanding it:
-
-| Pattern | Indicates | Ghost Action |
-|---------|-----------|-------------|
-| "Rebuilt" or "recreated" data | Possible assumption-based destruction | Flag, verify intent was confirmed |
-| `setDoc()` without `{ merge: true }` | PUT semantics — may overwrite | Verify justification in FOOTPRINT |
-| Missing Understanding Proof | Ant skipped LAW 1 | REJECT |
-| "Fixed broken data" without investigation | Anti-Assumption Rule A-01/A-02 violation | REJECT |
-| New seed/demo data in report | Possible A-03 violation | Verify original intent was confirmed |
+> **Full specification:** See `shared/NEO-SURGICAL.md` — 3 Laws (Understanding, Backup, Verify), Anti-Assumption Rules (A-01→A-03), Feature Protection (Section 6b), and Scope Contraction Detection (Section 8).
+> **Key sections:** LAW 1 Understanding Proof, LAW 2 Backup Proof, Dry-Run Evidence, Non-Existence Verification, Feature Inventory cross-check, Scope Contraction euphemism patterns.
+> **Ghost validation:** Verify Understanding Proof exists before any data change. Cross-check Feature Inventory counts independently. Flag scope contraction euphemisms ("consolidated", "simplified", "refactored").
 
 ---
 
-## Changelog
+## 14) Nearest Truth Rule (Source Priority Hierarchy)
 
-### [1.3.0] 2026-02-10
-- Section 2: New finding types — backup proof, dry-run result, data op classification, understanding proof
-- Section 5: Ant checklist gains 4 surgical checks (understanding, data ops, backup, dry-run)
-- Section 5: Ghost checklist gains 4 surgical checks (understanding, backup, anti-assumption, write semantics)
-- Section 13: Surgical Protocol Evidence — LAW 1 understanding proof, LAW 2 backup proof, dry-run evidence, anti-assumption detection
-- Quick Reference updated with surgical evidence summary
-- Cross-reference: All surgical rules defined in `NEO-SURGICAL.md` v1.0.0
-- ALL additions are MANUAL ONLY — no automation
+When an Ant encounters conflicting information from different sources, it MUST follow this priority hierarchy to determine which source is "nearest truth":
 
-### [1.2.0] 2026-02-10
-- Section 12: Hive Mind Evidence Requirements — required evidence for Section 10: HIVE CONTEXT
-- Hive context claims: previous tasks, file history, active pheromones, high-traffic flags, NUCLEAR clearance
-- Ghost validation rules for hive context (spot-check 2 claims)
-- Evidence budget exemption for hive mind greps (pre-DISCOVERY)
-- ALL additions are MANUAL ONLY — no automation
+### 14.1 Source Priority (FROZEN)
 
-### [1.1.0] 2026-02-09
-- Section 8: Pheromone System — structured warning markers with 5 severity levels
-- Section 9: Tenant Isolation Pheromones — TENANT_BOUNDARY, CROSS_TENANT_QUERY (⚫ NUCLEAR), TENANT_CONTEXT (🔴 HIGH), SHARED_COMPONENT (🟠 MEDIUM)
-- Section 10: Evidence Budget (Anti-Drowning Protocol) — hard caps per state, two-pass workflow, one-question rule
-- Updated Quick Reference with pheromone levels and evidence budget
-- ALL additions are MANUAL ONLY — no automation
+```
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                                                                              ║
+║   NEAREST TRUTH — SOURCE PRIORITY HIERARCHY                                 ║
+║                                                                              ║
+║   When sources conflict, trust the source CLOSEST TO REALITY:               ║
+║                                                                              ║
+║   PRIORITY 1 ▶ CODE (actual running code, what the system DOES)             ║
+║   PRIORITY 2 ▶ CONFIG / RULES (env files, Firestore rules, package.json)    ║
+║   PRIORITY 3 ▶ OPERATOR MANUAL (project documentation in .neo/)            ║
+║   PRIORITY 4 ▶ HIVE MIND REPORTS (prior Ant reports, Ghost reviews)        ║
+║   PRIORITY 5 ▶ EXTERNAL DOCS (library docs, Stack Overflow, tutorials)     ║
+║                                                                              ║
+║   Code > Config > Manual > Reports > External                               ║
+║                                                                              ║
+║   THE CARDINAL RULE:                                                         ║
+║   If sources conflict → REPORT THE CONFLICT. Do NOT silently pick a side.   ║
+║   The operator decides which source is authoritative.                        ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+```
 
-### [1.0.0] 2026-02-09
-- Initial release
-- Adapted from IAMBecca IAMBECCA-EVIDENCE.md v1.1.0
-- Core evidence doctrine (frozen)
-- Rejected patterns (placeholder paths, generic text, fabricated evidence)
-- Evidence scoring rubric (5 dimensions)
-- Role-specific checklists (Ant, Ghost, Inspector)
-- Evidence categories and storage structure
+### 14.2 Conflict Resolution Protocol
+
+When an Ant finds conflicting information:
+
+```
+1. IDENTIFY: Name the conflicting sources explicitly
+   → "Code says X (src/auth/login.ts:42) but Operator Manual says Y (Section 4.2)"
+
+2. CITE BOTH: Quote the relevant evidence from each source
+   → Code evidence: <exact line/function>
+   → Other source evidence: <exact quote/section>
+
+3. STATE PRIORITY: Name which source is higher priority per the hierarchy
+   → "Per Nearest Truth Rule, Code (P1) outranks Manual (P3)"
+
+4. REPORT — DO NOT RESOLVE: Present the conflict to operator
+   → "⚠️ SOURCE CONFLICT: Code vs Manual — operator decision required"
+   → The Ant does NOT silently follow one source over the other
+
+5. WAIT: Operator decides which source is authoritative for THIS task
+```
+
+### 14.3 Common Conflict Scenarios
+
+| Conflict | Example | Correct Action |
+|----------|---------|----------------|
+| Code ≠ Manual | Manual says "voice is disabled" but code has active voice files | REPORT — code is running, manual may be stale |
+| Manual ≠ Report | Operator Manual says "use PATCH" but prior Ant report used PUT | REPORT — manual outranks prior report |
+| Code ≠ Config | Code reads from collection A but config points to collection B | REPORT — likely a bug, present both |
+| Report ≠ Report | Two prior Ant reports give different approaches | REPORT — present both, let operator choose |
+| Code ≠ External docs | Code uses deprecated API but it works | DO NOT "fix" — working code outranks external docs |
+
+### 14.4 The Stale Manual Trap
+
+```
+⚠️ THE STALE MANUAL TRAP — This is how the Sonny feature deletion happened.
+
+An Ant read a stale Operator Manual that described a feature as "removed"
+when the feature was actually live in the codebase with 10+ active files.
+The Ant treated the manual as ground truth and deleted the feature.
+
+NEAREST TRUTH RULE prevents this:
+→ Code (10 active files, running in production) = PRIORITY 1
+→ Operator Manual (may be 7 runs stale) = PRIORITY 3
+→ Code outranks Manual. The feature EXISTS because the code says so.
+→ If manual contradicts code: REPORT THE CONFLICT. Do not delete.
+```
+
+---
+
+## 15) SaaS Safety Evidence (NEO-SURGICAL.md Sections 11-15)
+
+> **Full specification:** See `shared/NEO-SURGICAL.md` Sections 11-15 — Tenant Isolation, Environment Gate, Destructive Operations Registry, Secret Handling, PII Classification.
+> **Key gates:** Tenant Isolation Scan (DISCOVERY), TARGET_ENVIRONMENT (FOOTPRINT), 🔑 PRODUCTION CONFIRMED (operator), ⚫ NUCLEAR INCIDENT REPORT (breach).
+> **Ghost validation:** Reject if TARGET_ENVIRONMENT missing (S-35). Verify secret scan in DISCOVERY. Reject if PII/secrets appear in report text.
+
+---

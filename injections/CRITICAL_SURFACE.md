@@ -10,7 +10,7 @@ Your FOOTPRINT includes a **critical surface** — a protected file that require
 
 **You must STOP and get a CRITICAL SURFACE OVERRIDE before proceeding to PATCH.**
 
-### Critical surfaces include (from NEO-TOOLS.md Section 6):
+### Critical surfaces include (from NEO-TOOLS.md Section 9):
 
 - **Auth / Security** — `**/auth/**`, `**/security/**`, `*.rules`, middleware
 - **Data Layer** — `**/migrations/**`, `**/schemas/**`, `*.prisma`

@@ -123,80 +123,13 @@ Five catastrophic failure modes that compromise system integrity. Every Ant repo
 
 ---
 
-## HORSEMEN CHECK TEMPLATE
+## HORSEMEN CHECK TEMPLATES
 
-### For Ant Reports (Section in ANT_REPORT)
-
-Ants include this self-assessment at VERIFY:
-
-```
-## HORSEMEN SELF-CHECK
-═══════════════════════════════════════════════════════════════
-
-H1 HALLUCINATION: ✅/❌
-   Evidence: {list proof artifacts provided}
-
-H2 AMNESIA: ✅/❌
-   Context: {Hive Mind Check done? Pheromones respected?}
-
-H3 DRIFT: ✅/❌
-   Scope: {FOOTPRINT matches actual changes?}
-
-H4 PRIVILEGE CREEP: ✅/❌
-   Permissions: {Critical surfaces? Overrides obtained?}
-
-H5 SILENT FAILURE: ✅/❌
-   Observability: {Tests pass? Build clean? Errors handled?}
-
-═══════════════════════════════════════════════════════════════
-```
-
-### For Ghost Reviews (Section in GHOST_REVIEW)
-
-Ghost validates each Horseman against the Ant's evidence:
-
-```
-## HORSEMEN VERDICT
-═══════════════════════════════════════════════════════════════
-
-H1 HALLUCINATION: ✅ DEFEATED / ❌ DETECTED
-   {Ghost's assessment of evidence quality}
-
-H2 AMNESIA: ✅ DEFEATED / ❌ DETECTED
-   {Ghost's assessment of context awareness}
-
-H3 DRIFT: ✅ DEFEATED / ❌ DETECTED
-   {Ghost's assessment of scope discipline}
-
-H4 PRIVILEGE CREEP: ✅ DEFEATED / ❌ DETECTED
-   {Ghost's assessment of permission compliance}
-
-H5 SILENT FAILURE: ✅ DEFEATED / ❌ DETECTED
-   {Ghost's assessment of observability}
-
-VERDICT: ✅ ALL HORSEMEN DEFEATED / ❌ FAIL — {which failed}
-═══════════════════════════════════════════════════════════════
-```
-
-### For Inspector Audits (Section in INSPECTOR_REPORT)
-
-Inspector audits both Ant and Ghost for all five:
-
-```
-## HORSEMEN AUDIT
-═══════════════════════════════════════════════════════════════
-
-| Horseman | Ant Self-Check | Ghost Review | Inspector Finding |
-|----------|---------------|--------------|-------------------|
-| H1 HALLUCINATION | ✅/❌ | ✅/❌ | ✅/❌ + notes |
-| H2 AMNESIA | ✅/❌ | ✅/❌ | ✅/❌ + notes |
-| H3 DRIFT | ✅/❌ | ✅/❌ | ✅/❌ + notes |
-| H4 PRIVILEGE CREEP | ✅/❌ | ✅/❌ | ✅/❌ + notes |
-| H5 SILENT FAILURE | ✅/❌ | ✅/❌ | ✅/❌ + notes |
-
-AUDIT VERDICT: ✅ CLEAN / ❌ VIOLATIONS FOUND
-═══════════════════════════════════════════════════════════════
-```
+> Templates for Ant Self-Check, Ghost Verdict, and Inspector Audit are in their respective report templates:
+> - **Ant:** `templates/ANT_REPORT.md` Section 7 (HORSEMEN SELF-CHECK)
+> - **Ghost:** `templates/GHOST_REVIEW.md` (HORSEMEN VERDICT)
+> - **Inspector:** `templates/INSPECTOR_REPORT.md` (HORSEMEN AUDIT)
+> - **Cards:** `cards/ant/ANT_VERIFY.md`, `cards/ghost/GHOST_VERDICT.md`, `cards/inspector/INSPECTOR_VERDICT.md`
 
 ---
 
@@ -227,47 +160,3 @@ CANNOT PROCEED UNTIL: {condition}
 ```
 
 ---
-
-## Quick Reference
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│  NEO-FIVE-HORSEMEN v1.0.0 — QUICK REFERENCE                 │
-├─────────────────────────────────────────────────────────────┤
-│                                                               │
-│  H1 HALLUCINATION: Claims without evidence                    │
-│     → Every claim needs a proof artifact                      │
-│                                                               │
-│  H2 AMNESIA: Forgotten context/prior work                     │
-│     → Hive Mind Check + pheromones + prior Ants               │
-│                                                               │
-│  H3 DRIFT: Scope creep beyond FOOTPRINT                       │
-│     → Actual changes must match approved plan                 │
-│                                                               │
-│  H4 PRIVILEGE CREEP: Unauthorized actions                     │
-│     → Critical surfaces need OVERRIDE tokens                  │
-│                                                               │
-│  H5 SILENT FAILURE: Undetected breakage                       │
-│     → Tests + build + runtime verification                    │
-│                                                               │
-│  WHO CHECKS:                                                  │
-│  • Ant: Self-check at VERIFY                                  │
-│  • Ghost: Validates all 5 during review                       │
-│  • Inspector: Audits Ant + Ghost for all 5                    │
-│                                                               │
-│  ANY FAIL = VERDICT FAIL. No exceptions.                      │
-│                                                               │
-└─────────────────────────────────────────────────────────────┘
-```
-
----
-
-## Changelog
-
-### [1.0.0] 2026-02-12
-- Initial release — adapted from Colony OS Five Horsemen Protocol v1.0.0
-- 5 catastrophic failure modes: Hallucination, Amnesia, Drift, Privilege Creep, Silent Failure
-- Detection signals and checklist items for each
-- Templates for Ant self-check, Ghost review, Inspector audit
-- NEO pipeline state mapping
-- ALL additions are MANUAL ONLY — no automation

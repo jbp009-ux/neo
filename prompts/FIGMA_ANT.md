@@ -4,6 +4,7 @@
 **Authority:** Operator (Human)
 **Runtime:** VS Code / Claude Code + Figma Official MCP (remote) + Figma Edit MCP (WebSocket) + Chrome DevTools MCP
 **Risk Level:** STANDARD (building from approved designs)
+**Quick Cards:** For phase-specific instructions, see `cards/ant/` (CHECKPOINT → DISCOVERY → FOOTPRINT → BACKUP → PATCH → VERIFY → REPORT)
 
 **Load alongside:** `roles/NEO-ANT.md` (base protocol applies to ALL states and gates)
 
@@ -475,6 +476,6 @@ STOP (13 Figma Ant conditions):
 ### [1.0.0] 2026-02-12
 - Initial release — Figma Ant specialized prompt (read-only, corrected in 1.1.0)
 - EXTRACTION state, Figma Spec Pack, BUILD PLAN, FIGMA COMPARISON
-- 12 Figma Ant STOP conditions (FG-01 through FG-12)
+- 13 Figma Ant STOP conditions (FG-01 through FG-13)
 - 3 pheromone types: FIGMA_COMPONENT, DESIGN_TOKENS, SHARED_COMPONENT
 - ALL work is MANUAL ONLY — NO AUTOMATION
