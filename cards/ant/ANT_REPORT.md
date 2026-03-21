@@ -14,12 +14,24 @@
 | 3 | FOOTPRINT | Data op classification, feature impact, target environment |
 | 4 | BACKUP (if applicable) | Backup proof table, restore test |
 | 5 | PATCH | Diffs, truthy diffs checklist (7/7), anti-assumption check |
-| 6 | VERIFICATION | Test/build/lint results, CI/CD table, feature inventory |
+| 6 | VERIFICATION | Test/build/lint results, CI/CD table, Feature Inventory (before/after table: what existed → what changed) |
 | 7 | EVIDENCE | All file paths, line numbers, diffs — no placeholders |
 | 8 | LESSONS FOR FUTURE ANTS | See categories below |
 | 9 | PHEROMONES | Emitted + resolved pheromones |
 | 10 | ROLLBACK PLAN | Exact steps to undo all changes |
-| 11 | HIVE EVIDENCE | Hive Mind Briefing + 7-row proof table |
+| 11 | HIVE EVIDENCE | Hive Mind Briefing + 7-row proof table (use this exact format): |
+
+```
+| Index | Checked? | Finding |
+|-------|----------|---------|
+| MASTER_INDEX | YES/NO | <what you found or "no relevant entries"> |
+| FILE_OWNERSHIP | YES/NO | <owner/run for target files or "new file"> |
+| PHEROMONE_MEDIUM | YES/NO | <active pheromones on target files or "none"> |
+| LESSONS_INDEX | YES/NO | <relevant lessons or "none"> |
+| REJECTION_INDEX | YES/NO | <prior rejections in this area or "none"> |
+| FINDINGS_INDEX | YES/NO | <relevant recurring findings or "none"> |
+| NEO-HIVEMIND-GLOBAL | YES/NO | <relevant cross-project patterns or "none"> |
+```
 | 12 | SELF-ASSESSMENT | Honest evaluation, confidence level |
 | 13 | PROMPT FEEDBACK | See categories below |
 
@@ -63,7 +75,7 @@
 □ Did I stay within FOOTPRINT — no files outside approved scope?
 □ Would Ghost find real diffs if they checked my claims?
 □ Did I self-check for the Five Horsemen? (Section 5 above — all 5 must be answered)
-□ Is CARD_RECEIPT present? (deck_id, cards_executed, card_outputs — Ghost AUTO REJECTs if missing)
+□ Is CARD_RECEIPT present? (deck_id, cards_executed, card_outputs, **policy_pack_version: PP-XXXX** — Ghost AUTO REJECTs if missing)
 □ Is SAAS SAFETY PREFLIGHT present? (Section 4 above — all 10 items answered)
 □ Is HORSEMEN SELF-CHECK present? (Section 5 above — all 5 items answered)
 **→ If ANY answer is NO: fix it BEFORE submitting. Do NOT submit with known deficiencies.**

@@ -54,6 +54,8 @@
 | Run | Incident | Severity | Type | Root Cause | Fix Status |
 |-----|----------|----------|------|------------|------------|
 | — | *No incidents recorded yet* | — | — | — | — |
+| Run 005 | SCAN-005: PIPELINE_EVAL.md stale section refs — EVAL-03 "Section 10", EVAL-12 "Section 7", EVAL-16 "Section 14" — all point to sections that don't match current Ant report format | LOW | DOCS | Template not updated when report format section numbering changed | PROPOSED (FIX_PROPOSAL-SCAN005-001 — operator to decide) |
+| RUN-006 | HIVE EVIDENCE 7-row absent (0/5 reports); FEATURE INVENTORY vague; V-NN table absent in Ghost output; policy_pack not cited; Section 6b absent from Sonny+beccaos Ghost card | MEDIUM | SKIP | Output format gaps: ANT_REPORT.md Section 11 (no template), Section 6 (no before/after spec), CARD_RECEIPT (no policy_pack); GHOST_REVIEW.md Section 11 (checklist not output table), no policy_pack gate, Section 6b missing from deployed copies | APPLIED-RUN-006 — Prompt Architect: 3 changes to ANT_REPORT.md + 4 changes to GHOST_REVIEW.md (incl. Section 6b restore); deployed to neo main + Sonny + beccaos |
 
 **Fix Status values:** PROPOSED (fix suggested, awaiting approval) · DEFERRED (operator chose to defer) · APPLIED-Run-NNN (fix applied in specified run) · RECURRING (seen in multiple runs)
 

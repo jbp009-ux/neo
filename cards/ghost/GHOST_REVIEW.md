@@ -12,6 +12,7 @@
 ## 2. HARD GATE CHECKS (Ghost MUST verify — AUTO REJECT if missing)
 □ CARD_RECEIPT section present in Ant report? → NO = AUTO REJECT (S-38)
 □ CORE cards in CARD_RECEIPT all executed or have CARD_WAIVER? → Skipped without waiver = AUTO REJECT (S-39)
+□ `policy_pack_version` field present in CARD_RECEIPT? → NO = FINDING (MEDIUM) — must cite current PP-date
 □ SAAS SAFETY PREFLIGHT section present (10 items)? → NO = FINDING (HIGH)
 □ HORSEMEN SELF-CHECK section present (5 items)? → NO = FINDING (HIGH)
 □ If ANY of the above is missing, record it as your FIRST finding before continuing.
@@ -39,7 +40,7 @@
 □ Section 8: Lessons for Future Ants
 □ Section 9: Pheromones emitted/resolved
 □ Section 10: Rollback plan
-□ Section 11: Hive Evidence + 7-row proof table
+□ Section 11: Hive Evidence + 7-row proof table (all 7 indexes present, all rows YES — blank rows = FINDING HIGH)
 □ Section 12: Self-assessment
 □ Section 13: Prompt Feedback
 
@@ -58,6 +59,21 @@
 □ LAW 3: Write semantics justified (PUT/DELETE have rationale)
 □ No assumption patterns (A-01 → A-08)
 □ Dry-run evidence (if destructive ops)
+
+## 6b. CARD COMPLIANCE
+□ CARD_RECEIPT present in Ant report (Section 2 confirmed binary — now validate semantics)
+□ `deck_id` matches the run's Card Deck (CD-<RUN_NUMBER>)
+□ `cards_executed` is non-empty
+□ CARD-CORE-001 (Load Policy Pack) in `cards_executed`
+□ CARD-CORE-003 (Scope Lock) in `cards_executed` — or valid CARD_WAIVER
+□ CARD-CORE-004 (Evidence Capture Plan) in `cards_executed` — or valid CARD_WAIVER
+□ CARD-CORE-005 (Post-Change Verification) in `cards_executed` — or valid CARD_WAIVER
+□ CARD-CORE-002 (Backup-First Proof) in `cards_executed` IF data ops present — or valid CARD_WAIVER
+□ Every skipped card has a CARD_WAIVER with: reason, risk, mitigation
+□ Cards executed logically cover ALL actions performed (no freeform work without card citation)
+□ Card acceptance criteria shown as met for each executed card
+□ **FAIL_BLOCKING if CARD_RECEIPT missing or required CORE cards absent without waiver**
+□ **Self-Healing:** Ghost states which card(s) missing + next card to run + expected artifact
 
 ## 7. PROOF-FORCING CHECKS
 □ Discovery Strategy: present + question answered with evidence
@@ -94,20 +110,27 @@
 □ No PII (T1/T2) in report text
 □ No secret values in report text
 
-## 11. VIOLATION SCAN (all 13)
-□ V-01: Gate skipping
-□ V-02: Budget exceeded without expansion token
-□ V-03: "Read-only exception" claimed
-□ V-04: Token self-issued (fabrication)
-□ V-05: Multi-gate message
-□ V-06: Acknowledge and continue past STOP
-□ V-07: Wrong prefix (approval without 🔑)
-□ V-08: Critical surface edit without override
-□ V-09: Data operation without backup proof
-□ V-10: Project lock violation (file outside root)
-□ V-11: Feature removal without override
-□ V-12: Token normalization failure
-□ V-13: Work after NUCLEAR without resolution
+## 11. VIOLATION SCAN (all 13) — MANDATORY OUTPUT TABLE
+□ Check all 13 violations below.
+□ **REQUIRED: Produce this table in your Ghost review output** (internal checklist alone is NOT sufficient):
+
+| Violation | Status | Evidence |
+|-----------|--------|----------|
+| V-01: Gate skipping | ✅/❌ | |
+| V-02: Budget exceeded without expansion token | ✅/❌ | |
+| V-03: "Read-only exception" claimed | ✅/❌ | |
+| V-04: Token self-issued (fabrication) | ✅/❌ | |
+| V-05: Multi-gate message | ✅/❌ | |
+| V-06: Acknowledge and continue past STOP | ✅/❌ | |
+| V-07: Wrong prefix (approval without 🔑) | ✅/❌ | |
+| V-08: Critical surface edit without override | ✅/❌ | |
+| V-09: Data operation without backup proof | ✅/❌ | |
+| V-10: Project lock violation (file outside root) | ✅/❌ | |
+| V-11: Feature removal without override | ✅/❌ | |
+| V-12: Token normalization failure | ✅/❌ | |
+| V-13: Work after NUCLEAR without resolution | ✅/❌ | |
+
+□ Any ❌ → FINDING (severity matches violation level). Prose summary is NOT a substitute for this table.
 
 ## 12. SCOPE CONTRACTION DETECTION
 □ Exports removed from files not in FOOTPRINT? → REJECT (contraction variant of scope creep)

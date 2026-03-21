@@ -304,73 +304,73 @@ BECCA_RECON → [PLAN assessment → dispatch Planner or skip] → [dispatch tas
 
 ---
 
-#### BECCA-VERIFY → `NEO-BECCA.md` L965–L1053
+#### BECCA-VERIFY → `NEO-BECCA.md` L1073–L1161
 | Card Step | Role Prompt Section | Line(s) | Shared Module |
 |-----------|-------------------|---------|---------------|
-| §1 Task Classification | §VERIFY: task classification (Builder/Debugger/QA) | L965–L990 | — |
-| §2 Regression Check | §VERIFY: regression check (builder tasks only) | L965–L1010 | — |
-| §3 Completeness Check | §VERIFY: completeness (Ant+Ghost+Inspector ✅) | L965–L1030 | — |
-| §4 Debugger Resolution Check | §VERIFY: debugger resolution (if Debugger tasks) | L965–L1040 | — |
-| §5 Consistency Check | §VERIFY: build + tests still pass | L965–L1050 | — |
-| §6 Verify Output | §VERIFY: VERIFY output block | L965–L1053 | — |
+| §1 Task Classification | §VERIFY: task classification (Builder/Debugger/QA) | L1073–L1098 | — |
+| §2 Regression Check | §VERIFY: regression check (builder tasks only) | L1073–L1118 | — |
+| §3 Completeness Check | §VERIFY: completeness (Ant+Ghost+Inspector ✅) | L1073–L1138 | — |
+| §4 Debugger Resolution Check | §VERIFY: debugger resolution (if Debugger tasks) | L1073–L1148 | — |
+| §5 Consistency Check | §VERIFY: build + tests still pass | L1073–L1158 | — |
+| §6 Verify Output | §VERIFY: VERIFY output block | L1073–L1161 | — |
 
 **Acceptance:** VERDICT: ✅ VERIFIED (or ❌ with evidence).
 
 ---
 
-#### BECCA-CLOSE-ARCHIVE → `NEO-BECCA.md` L1054–L1360
+#### BECCA-CLOSE-ARCHIVE → `NEO-BECCA.md` L1162–L1513
 | Card Step | Role Prompt Section | Line(s) | Shared Module |
 |-----------|-------------------|---------|---------------|
-| §1 TODO | §CLOSE: TODO update | L1054–L1070 | — |
-| §2 Archive | §CLOSE: archive TODO | L1054–L1080 | — |
-| §3 STATE | §CLOSE: STATE.md update | L1054–L1100 | — |
-| §4 RUN INDEX | §RUN INDEX UPDATE | L1218–L1259 | — |
-| §5 HIVE INDEX WRITES (6 indexes) | §HIVE INDEX UPDATE | L1260–L1360 | `NEO-HIVE.md` — all 6 index write contracts |
-| §5 Lesson Reinforcement | §HIVE INDEX: Lesson Reinforcement | L1260–L1360 | `NEO-HIVE.md` §9 — Usage Stats |
+| §1 TODO | §CLOSE: TODO update | L1162–L1178 | — |
+| §2 Archive | §CLOSE: archive TODO | L1162–L1188 | — |
+| §3 STATE | §CLOSE: STATE.md update | L1162–L1208 | — |
+| §4 RUN INDEX | §RUN INDEX UPDATE | L1326–L1367 | — |
+| §5 HIVE INDEX WRITES (6 indexes) | §HIVE INDEX UPDATE | L1368–L1513 | `NEO-HIVE.md` — all 6 index write contracts |
+| §5 Lesson Reinforcement | §HIVE INDEX: Lesson Reinforcement | L1368–L1513 | `NEO-HIVE.md` §9 — Usage Stats |
 
 **Acceptance:** HIVE INDEX UPDATE summary presented. All 6 indexes updated.
 
 ---
 
-#### BECCA-CLOSE-ANALYTICS → `NEO-BECCA.md` L1361–L1827
+#### BECCA-CLOSE-ANALYTICS → `NEO-BECCA.md` L1514–L1980
 | Card Step | Role Prompt Section | Line(s) | Shared Module |
 |-----------|-------------------|---------|---------------|
-| §6 Run Metrics | §RUN METRICS | L1361–L1435 | — |
-| §6b Band-Aid Detection | §BAND-AID DETECTION | L1436–L1489 | — |
-| §6c Improvement Velocity | §IMPROVEMENT VELOCITY | L1490–L1525 | — |
-| §6d Pipeline Eval | §PIPELINE EVAL | L1526–L1571 | `templates/PIPELINE_EVAL.md` — 19 checks |
-| §7 Operator Manual Update | §OPERATOR MANUAL UPDATE | L1572–L1660 | Project `OPERATOR_MANUAL.md` |
-| §8 Cross-Project Hivemind | §CROSS-PROJECT HIVEMIND UPDATE | L1661–L1713 | `shared/NEO-HIVEMIND-GLOBAL.md` |
-| §9 Prompt Feedback Aggregation | §PROMPT FEEDBACK AGGREGATION | L1714–L1764 | — |
-| §10 Run Retrospective | §RUN RETROSPECTIVE | L1765–L1827 | — |
+| §6 Run Metrics | §RUN METRICS | L1514–L1588 | — |
+| §6b Band-Aid Detection | §BAND-AID DETECTION | L1589–L1642 | — |
+| §6c Improvement Velocity | §IMPROVEMENT VELOCITY | L1643–L1678 | — |
+| §6d Pipeline Eval | §PIPELINE EVAL | L1679–L1724 | `templates/PIPELINE_EVAL.md` — 19 checks |
+| §7 Operator Manual Update | §OPERATOR MANUAL UPDATE | L1725–L1813 | Project `OPERATOR_MANUAL.md` |
+| §8 Cross-Project Hivemind | §CROSS-PROJECT HIVEMIND UPDATE | L1814–L1866 | `shared/NEO-HIVEMIND-GLOBAL.md` |
+| §9 Prompt Feedback Aggregation | §PROMPT FEEDBACK AGGREGATION | L1867–L1917 | — |
+| §10 Run Retrospective | §RUN RETROSPECTIVE | L1918–L1980 | — |
 
 **Acceptance:** ANALYTICS SUMMARY presented (metrics, band-aid score, velocity, EVAL SCORE, health signals).
 
 ---
 
-#### BECCA-CLOSE-GOVERNANCE → `NEO-BECCA.md` L1828–L2230
+#### BECCA-CLOSE-GOVERNANCE → `NEO-BECCA.md` L2032–L2490
 | Card Step | Role Prompt Section | Line(s) | Shared Module |
 |-----------|-------------------|---------|---------------|
-| §11 Framework Health Check | §FRAMEWORK HEALTH CHECK | L1828–L1928 | — |
-| §11b Protocol Adoption Scan | §PROTOCOL ADOPTION SCAN | L1929–L1980 | — |
-| §11c Framework Fix Escalation | §FRAMEWORK FIX ESCALATION | L1981–L2045 | `prompts/PROMPT_ARCHITECT.md` |
-| §11d GPS Integrity Audit | §GPS INTEGRITY AUDIT | L2046–L2230 | `cards/CARD_GPS_MAP.md` |
-| §11e Rotating Deep Scan | §ROTATING DEEP SCAN | L2231–L2280 | `cards/SYSTEM_ATLAS_INDEX.md` |
-| §11f GPS Scan Log | §GPS SCAN LOG | L2281–L2310 | — |
-| §12 Merge | §CLOSE: merge to main | L1054–L1070 | — |
-| §13 Sign Off | §CLOSE: COMPLETION REPORT | L1122–L1217 | — |
+| §11 Framework Health Check | §FRAMEWORK HEALTH CHECK | L2032–L2132 | — |
+| §11b Protocol Adoption Scan | §PROTOCOL ADOPTION SCAN | L2133–L2184 | — |
+| §11c Framework Fix Escalation | §FRAMEWORK FIX ESCALATION | L2185–L2241 | `prompts/PROMPT_ARCHITECT.md` |
+| §11d GPS Integrity Audit | §GPS INTEGRITY AUDIT | L2242–L2415 | `cards/CARD_GPS_MAP.md` |
+| §11e Rotating Deep Scan | §ROTATING DEEP SCAN | L2416–L2460 | `cards/SYSTEM_ATLAS_INDEX.md` |
+| §11f GPS Scan Log | §GPS SCAN LOG | L2461–L2490 | — |
+| §12 Merge | §CLOSE: merge to main | L1162–L1178 | — |
+| §13 Sign Off | §CLOSE: COMPLETION REPORT | L1230–L1325 | — |
 
 **Acceptance:** All CLOSE steps completed, GPS VERDICT + DEEP SCAN logged, `🔑 RUN COMPLETE`.
 
 ---
 
-#### BECCA-CLOSE-DEVTOOLS → `NEO-BECCA.md` L1868–L1915 (DEVTOOLS VERIFICATION)
+#### BECCA-CLOSE-DEVTOOLS → `NEO-BECCA.md` L1981–L2031 (DEVTOOLS VERIFICATION)
 | Card Step | Role Prompt Section | Line(s) | Shared Module |
 |-----------|-------------------|---------|---------------|
-| §1 Trigger Assessment | §DEVTOOLS VERIFICATION: trigger tables | L1868–L1900 | — |
-| §2 Dispatch Chief Sentinel | §DEVTOOLS VERIFICATION: dispatch | L1868–L1910 | `prompts/DEVTOOLS_SENTINEL_ANT.md` |
-| §3 Dispatch Specialists | §DEVTOOLS VERIFICATION: specialists | L1868–L1910 | `prompts/DEVTOOLS_PERF_ANT.md`, `prompts/DEVTOOLS_NETWORK_ANT.md` |
-| §4 DevTools Verdict | §DEVTOOLS VERIFICATION: verdict | L1868–L1915 | `templates/DEVTOOLS_REPORT.md` |
+| §1 Trigger Assessment | §DEVTOOLS VERIFICATION: trigger tables | L1981–L2013 | — |
+| §2 Dispatch Chief Sentinel | §DEVTOOLS VERIFICATION: dispatch | L1981–L2023 | `prompts/DEVTOOLS_SENTINEL_ANT.md` |
+| §3 Dispatch Specialists | §DEVTOOLS VERIFICATION: specialists | L1981–L2023 | `prompts/DEVTOOLS_PERF_ANT.md`, `prompts/DEVTOOLS_NETWORK_ANT.md` |
+| §4 DevTools Verdict | §DEVTOOLS VERIFICATION: verdict | L1981–L2031 | `templates/DEVTOOLS_REPORT.md` |
 
 **Acceptance:** `🔑 DEVTOOLS VERIFICATION APPROVED` issued. DEVTOOLS_CHIEF/DEVTOOLS_ESCALATED/DEVTOOLS_EVIDENCE recorded in STATE.md.
 
